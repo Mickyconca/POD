@@ -6,9 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="base-api" />
-        <module name="base-server" />
-        <module name="base-client" />
+        <module name="tpe1-api" />
+        <module name="tpe1-server" />
+        <module name="tpe1-client" />
       </profile>
     </annotationProcessing>
   </component>
