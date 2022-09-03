@@ -4,8 +4,10 @@ import g6.server.Servant.FlightAdminServant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 public class Server {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
@@ -15,9 +17,10 @@ public class Server {
         logger.info("tpe1 Server Starting ...");
 
         try {
-            Registry registry = LocateRegistry.getRegistry("localhost", 1099);
             FlightAdminRemoteInterface stub = new FlightAdminServant();
-            registry.rebind("pod", stub);
+            final Remote remote = UnicastRemoteObject.exportObject(stub,0);
+            Registry registry = LocateRegistry.getRegistry("localhost", 1099);
+            registry.rebind("pod", remote);
             System.out.println("Service bound");
         } catch (Exception e) {
             e.printStackTrace();

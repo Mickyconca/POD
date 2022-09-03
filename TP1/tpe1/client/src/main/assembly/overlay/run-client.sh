@@ -1,8 +1,9 @@
 #!/bin/bash
 
+#java "$@" -cp 'lib/jars/*' "g6.client.Client"
 PATH_TO_CODE_BASE=`pwd`
 
-JAVA_OPTS="-Djava.rmi.server.codebase=file://$PATH_TO_CODE_BASE/lib/jars/rmi-params-client-1.0-SNAPSHOT.jar"
+JAVA_OPTS="-Djava.rmi.server.codebase=file://$PATH_TO_CODE_BASE/lib/jars/tpe1-client-1.0-SNAPSHOT.jar"
 
 MAIN_CLASS="g6.client.Client"
 
