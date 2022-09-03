@@ -21,3 +21,27 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+TP1/.DS_Store
+
+TP1/tpe1/.idea/encodings.xml
+
+TP1/tpe1/.idea/misc.xml
+
+TP1/tpe1/api/target/maven-archiver/pom.properties
+
+TP1/tpe1/client/target/classes/log4j.xml
+
+TP1/tpe1/client/target/maven-archiver/pom.properties
+
+TP1/tpe1/client/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+
+TP1/tpe1/client/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+
+TP1/tpe1/server/target/classes/log4j.xml
+
+TP1/tpe1/server/target/maven-archiver/pom.properties
+
+TP1/tpe1/server/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+
+TP1/tpe1/server/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
