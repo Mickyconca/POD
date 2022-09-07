@@ -1,4 +1,4 @@
-package g6.client.Interface;
+package ar.edu.itba.pod.server.Interface;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

@@ -1,6 +1,6 @@
-package g6.client;
+package ar.edu.itba.pod.client.Interface;
 
-import g6.client.Interface.FlightAdminRemoteInterface;
+import ar.edu.itba.pod.client.Interface.Interface.FlightAdminRemoteInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

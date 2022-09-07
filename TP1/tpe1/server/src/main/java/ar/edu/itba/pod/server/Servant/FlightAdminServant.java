@@ -1,6 +1,6 @@
-package g6.server.Servant;
+package ar.edu.itba.pod.server.Servant;
 
-import g6.server.Interface.FlightAdminRemoteInterface;
+import ar.edu.itba.pod.server.Interface.FlightAdminRemoteInterface;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
