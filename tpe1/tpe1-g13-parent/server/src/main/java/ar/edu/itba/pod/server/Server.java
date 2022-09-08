@@ -1,6 +1,6 @@
 package ar.edu.itba.pod.server;
 
-import ar.edu.itba.pod.interfaces.FlightAdminRemoteInterface;
+import ar.edu.itba.pod.services.FlightAdminService;
 import ar.edu.itba.pod.server.Servant.FlightAdminServant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ public class Server {
 
         logger.info("tpe1 Server Starting ...");
         try {
-            FlightAdminRemoteInterface stub = new FlightAdminServant();
+            FlightAdminService stub = new FlightAdminServant();
             final Remote remote = UnicastRemoteObject.exportObject(stub,0);
             Registry registry = LocateRegistry.getRegistry("localhost", 1099);
             registry.rebind("pod", remote);

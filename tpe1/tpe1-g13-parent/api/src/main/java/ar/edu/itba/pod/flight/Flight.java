@@ -1,40 +1,39 @@
 package ar.edu.itba.pod.flight;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Flight {
 
-    private final String id;
+    private final String flightCode;
     private final String destination;
     private final PlaneModel planeModel;
     private FlightStatus status;
     private Map<Category, List<Seat>> seats = new HashMap<>();
+    private Map<Category, Set<String>> passengers;
 
-    public Flight(PlaneModel planeModel, String id, String destination) {
-        this.id = id;
+    public Flight(PlaneModel planeModel, String flightCode, String destination, Map<Category,Set<String>> passengers) {
+        this.flightCode = flightCode;
         this.status = FlightStatus.PENDING;
         this.planeModel = planeModel;
         this.destination = destination;
         this.generateSeats();
+        this.passengers = passengers;
     }
 
     public FlightStatus getStatus() {
         return status;
     }
-    
+
     public void setStatus(FlightStatus status){
         this.status = status;
     }
-    
+
     public String getDestination() {
         return destination;
     }
 
-    public String getId() {
-        return id;
+    public String getFlightCode() {
+        return flightCode;
     }
 
     public PlaneModel getPlaneModel() {

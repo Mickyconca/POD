@@ -1,6 +1,6 @@
 package ar.edu.itba.pod.client;
 
-import ar.edu.itba.pod.interfaces.FlightAdminRemoteInterface;
+import ar.edu.itba.pod.services.FlightAdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ public class Client {
         System.out.println("Clientt");
         logger.info("tpe1 Client Starting ...");
 
-        FlightAdminRemoteInterface handle = (FlightAdminRemoteInterface) Naming.lookup("//localhost:1099/pod");
+        FlightAdminService handle = (FlightAdminService) Naming.lookup("//localhost:1099/pod");
         System.out.println(handle.print());
     }
 }

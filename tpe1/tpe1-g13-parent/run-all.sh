@@ -1,5 +1,5 @@
 #!/bin/bash
-TP_PATH=/Users/martirodriguez/Documents/ITBA/POD/POD/tpe1/tpe1-g13-parent
+TP_PATH=/mnt/c/Users/guigo/Documents/Github/POD/tpe1/tpe1-g13-parent
 
 cd $TP_PATH
 mvn install
