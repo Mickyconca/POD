@@ -26,12 +26,7 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
     }
 
     @Override
-    public String print() throws RemoteException {
-        return "Flight admin";
-    }
-
-    @Override
-    public void registerPlaneModel(String name, int[] businessSeats, int[] premiumSeats, int[] economySeats) throws DuplicateModelException{
+    public void registerPlaneModel(String name, int[] businessSeats, int[] premiumSeats, int[] economySeats) throws DuplicateModelException, RemoteException{
         synchronized (planeModelsLock){
             if(planeModels.containsKey(name)){
                 throw new DuplicateModelException();
@@ -45,7 +40,7 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
 
     //Boeing 787;AA100;JFK;BUSINESS#John,ECONOMY#Juliet,BUSINESS#Elizabeth
     @Override
-    public void registerFlight(String modelName, String flightCode, String destinyAirport, Map<Category, Set<String>> passengers) {
+    public void registerFlight(String modelName, String flightCode, String destinyAirport, Map<Category, Set<String>> passengers) throws RemoteException{
         synchronized (flightsLock) {
             if (flights.containsKey(flightCode)) {
                 throw new DuplicateFlightCodeException();
@@ -64,7 +59,7 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
     }
 
     @Override
-    public FlightStatus flightStatus(String flightCode) {
+    public FlightStatus flightStatus(String flightCode) throws RemoteException{
         synchronized(flightsLock){
             if(!flights.containsKey(flightCode)){
                 throw new FlightNotFoundException();
@@ -74,7 +69,7 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
     }
 
     @Override
-    public void confirmFlight(String flightCode) {
+    public void confirmFlight(String flightCode) throws RemoteException{
         synchronized(flightsLock){
             if(!flights.containsKey(flightCode)){
                 throw new FlightNotFoundException();
@@ -84,7 +79,7 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
     }
 
     @Override
-    public void cancelFlight(String flightCode) {
+    public void cancelFlight(String flightCode) throws RemoteException{
         synchronized(flightsLock){
             if(!flights.containsKey(flightCode)){
                 throw new FlightNotFoundException();

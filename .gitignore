@@ -91,3 +91,7 @@ TP1/tpe1/server/tpe1-server.iml
 TP1/tpe1/tpe1-parent.iml
 
 *.iml
+
+tpe1/tpe1-g13-parent/.idea/misc.xml
+
+tpe1/tpe1-g13-parent/.idea/workspace.xml

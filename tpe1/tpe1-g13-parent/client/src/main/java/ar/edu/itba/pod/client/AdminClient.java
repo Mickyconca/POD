@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
@@ -127,7 +128,12 @@ public class AdminClient {
                         break;
                 }
             }
-            flightAdminService.registerPlaneModel(line.get(0),businessSeats, premiumSeats, economySeats);
+            // TODO fix catch
+            try {
+                flightAdminService.registerPlaneModel(line.get(0),businessSeats, premiumSeats, economySeats);
+            } catch (RemoteException exception) {
+                System.out.print("Exception");
+            }
         }
 
     }
@@ -147,7 +153,12 @@ public class AdminClient {
 
         for (List<String> flightsLine : flightsLines) {
             Map<Category, Set<String>> tickets = parseTickets(flightsLine.get(3));
-            flightAdminService.registerFlight(flightsLine.get(0), flightsLine.get(1), flightsLine.get(2), tickets);
+            // TODO fix catch
+            try {
+                flightAdminService.registerFlight(flightsLine.get(0), flightsLine.get(1), flightsLine.get(2), tickets);
+            } catch (RemoteException exception) {
+                System.out.print("Exception");
+            }
         }
 
     }

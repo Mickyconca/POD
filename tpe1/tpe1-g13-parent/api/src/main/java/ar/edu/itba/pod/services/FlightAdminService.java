@@ -10,10 +10,9 @@ import java.util.Set;
 
 public interface FlightAdminService extends Remote {
 
-    String print() throws RemoteException;
-    void registerPlaneModel(String name, int[] businessSeats, int[] premiumSeats, int[] economySeats);
-    void registerFlight(String modelName, String flightCode, String destinyAirport, Map<Category, Set<String>> passengers);
-    FlightStatus flightStatus(String flightCode);
-    void confirmFlight(String flightCode);
-    void cancelFlight(String flightCode);
+    void registerPlaneModel(String name, int[] businessSeats, int[] premiumSeats, int[] economySeats) throws RemoteException;
+    void registerFlight(String modelName, String flightCode, String destinyAirport, Map<Category, Set<String>> passengers) throws RemoteException;
+    FlightStatus flightStatus(String flightCode) throws RemoteException;
+    void confirmFlight(String flightCode) throws RemoteException;
+    void cancelFlight(String flightCode) throws RemoteException;
 }
