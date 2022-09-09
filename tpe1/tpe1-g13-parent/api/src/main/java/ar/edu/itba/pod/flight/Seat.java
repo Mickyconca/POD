@@ -4,12 +4,14 @@ public class Seat {
 
     private int rowNumber;
     private char colLetter;
-    public boolean isEmpty;
+    private boolean isEmpty;
+    private Category category;
 
-    public Seat(int rowNumber, char colLetter) {
+    public Seat(int rowNumber, char colLetter, Category category) {
         this.rowNumber = rowNumber;
         this.colLetter = colLetter;
         this.isEmpty = true;
+        this.category = category;
     }
 
     public int getRowNumber() {
@@ -34,5 +36,13 @@ public class Seat {
 
     public void setEmpty(boolean empty) {
         isEmpty = empty;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }

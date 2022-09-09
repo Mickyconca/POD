@@ -1,10 +1,7 @@
 package ar.edu.itba.pod.server.Servant;
 
 import ar.edu.itba.pod.exceptions.*;
-import ar.edu.itba.pod.flight.Category;
-import ar.edu.itba.pod.flight.Flight;
-import ar.edu.itba.pod.flight.FlightStatus;
-import ar.edu.itba.pod.flight.PlaneModel;
+import ar.edu.itba.pod.flight.*;
 import ar.edu.itba.pod.services.FlightAdminService;
 
 import java.io.Serializable;
@@ -16,77 +13,78 @@ import java.util.Set;
 
 public class FlightAdminServant implements FlightAdminService, Serializable {
 
-    private final Map<String, PlaneModel> planeModels = new HashMap<>();
-    private final Map<String, Flight> flights = new HashMap<>();
-
+    private final Data data;
     private final Object planeModelsLock = new Object();
     private final Object flightsLock = new Object();
 
-    public FlightAdminServant() {
+    public FlightAdminServant(Data data) {
+        this.data = data;
     }
+
 
     @Override
     public void registerPlaneModel(String name, int[] businessSeats, int[] premiumSeats, int[] economySeats) throws DuplicateModelException, RemoteException{
         synchronized (planeModelsLock){
-            if(planeModels.containsKey(name)){
+            if(data.getPlaneModels().containsKey(name)){
                 throw new DuplicateModelException();
             }
             if(Arrays.stream(businessSeats).anyMatch(i -> i < 0) || Arrays.stream(premiumSeats).anyMatch(i -> i < 0) || Arrays.stream(economySeats).anyMatch(i -> i < 0)){
                 throw new InvalidModelException();
             }
-            this.planeModels.put(name, new PlaneModel(name, businessSeats, premiumSeats, economySeats));
+            this.data.getPlaneModels().put(name, new PlaneModel(name, businessSeats, premiumSeats, economySeats));
         }
     }
 
     //Boeing 787;AA100;JFK;BUSINESS#John,ECONOMY#Juliet,BUSINESS#Elizabeth
     @Override
-    public void registerFlight(String modelName, String flightCode, String destinyAirport, Map<Category, Set<String>> passengers) throws RemoteException{
+    public void registerFlight(String modelName, String flightCode, String destinyAirport, Map<String, Passenger> passengers) throws RemoteException{
         synchronized (flightsLock) {
-            if (flights.containsKey(flightCode)) {
+            if (data.getFlights().containsKey(flightCode)) {
                 throw new DuplicateFlightCodeException();
             }
-            if (!planeModels.containsKey(modelName)) {
+            if (!data.getPlaneModels().containsKey(modelName)) {
                 throw new ModelNotFoundException();
             }
-            PlaneModel planeModel = planeModels.get(modelName);
-            for (Category category : Category.values()) {
-                if (passengers.get(category).size() > planeModel.getCategoryCapacity(category)) {
-                    throw new InvalidAmountOfPassengersException();
-                }
+            PlaneModel planeModel = data.getPlaneModels().get(modelName);
+            int capacity = planeModel.getTotalCapacity();
+            if(passengers.size() > capacity){ //todo check this
+                throw new InvalidAmountOfPassengersException();
             }
-            this.flights.put(flightCode, new Flight(planeModel, flightCode, destinyAirport, passengers));
+            this.data.getFlights().put(flightCode, new Flight(planeModel, flightCode, destinyAirport, passengers));
         }
     }
 
     @Override
     public FlightStatus flightStatus(String flightCode) throws RemoteException{
         synchronized(flightsLock){
-            if(!flights.containsKey(flightCode)){
+            if(!data.getFlights().containsKey(flightCode)){
                 throw new FlightNotFoundException();
             }
-            return flights.get(flightCode).getStatus();
+            return data.getFlights().get(flightCode).getStatus();
         }
     }
 
     @Override
     public void confirmFlight(String flightCode) throws RemoteException{
         synchronized(flightsLock){
-            if(!flights.containsKey(flightCode)){
+            if(!data.getFlights().containsKey(flightCode)){
                 throw new FlightNotFoundException();
             }
-            flights.get(flightCode).setStatus(FlightStatus.CONFIRMED);
+            data.getFlights().get(flightCode).setStatus(FlightStatus.CONFIRMED);
         }
     }
 
     @Override
     public void cancelFlight(String flightCode) throws RemoteException{
         synchronized(flightsLock){
-            if(!flights.containsKey(flightCode)){
+            if(!data.getFlights().containsKey(flightCode)){
                 throw new FlightNotFoundException();
             }
-            flights.get(flightCode).setStatus(FlightStatus.CANCELLED);
+            data.getFlights().get(flightCode).setStatus(FlightStatus.CANCELLED);
         }
     }
+
+
 
 
 }

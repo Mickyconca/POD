@@ -29,6 +29,10 @@ public class PlaneModel {
         this.name = name;
     }
 
+    public int getTotalCapacity(){
+        return getCategoryCapacity(Category.BUSINESS) + getCategoryCapacity(Category.PREMIUM) + getCategoryCapacity(Category.ECONOMY);
+    }
+
     public int getCategoryCapacity(Category category){
         if(category == Category.BUSINESS){
             return businessSeats[0] * businessSeats[1];

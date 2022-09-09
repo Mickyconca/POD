@@ -55,7 +55,7 @@ public class AdminClient {
         }
 
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
-        final FlightAdminService flightAdminService = (FlightAdminService) registry.lookup("flightAdminService");
+        final FlightAdminService flightAdminService = (FlightAdminService) registry.lookup("FlightAdminService");
 
         runAction(flightAdminService,action, inPath);
 
