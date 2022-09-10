@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.flight;
 
+import ar.edu.itba.pod.exceptions.PassengerAlreadyInFlightException;
 import ar.edu.itba.pod.exceptions.PassengerNotFoundException;
 import ar.edu.itba.pod.exceptions.SeatNotFoundException;
 
@@ -14,7 +15,7 @@ public class Flight {
     private Map<String, Seat> seats = new HashMap<>();
     private Map<String, Passenger> passengers;
 
-    public Flight(PlaneModel planeModel, String flightCode, String destination, Map<String,Passenger> passengers) {
+    public Flight(PlaneModel planeModel, String flightCode, String destination, Map<String, Passenger> passengers) {
         this.flightCode = flightCode;
         this.status = FlightStatus.PENDING;
         this.planeModel = planeModel;
@@ -27,7 +28,7 @@ public class Flight {
         return status;
     }
 
-    public void setStatus(FlightStatus status){
+    public void setStatus(FlightStatus status) {
         this.status = status;
     }
 
@@ -51,10 +52,10 @@ public class Flight {
         this.seats = seats;
     }
 
-    public Passenger getPassenger(String passenger){
+    public Passenger getPassenger(String passenger) {
         Passenger p = passengers.get(passenger);
-        if(p == null){
-           throw new PassengerNotFoundException();
+        if (p == null) {
+            throw new PassengerNotFoundException();
         }
         return p;
     }
@@ -67,25 +68,52 @@ public class Flight {
         this.passengers = passengers;
     }
 
-    public Seat getSeat(int rowNumber, char colLetter){
+    public Seat getSeat(int rowNumber, char colLetter) {
         String key = rowNumber + String.valueOf(colLetter);
         Seat seat = seats.get(key);
-        if(seat == null){
+        if (seat == null) {
             throw new SeatNotFoundException();
         }
         return seat;
     }
 
-    private void generateSeats(){
-        for(Category c: Category.values()){
-            for(int[] seatNumbers: planeModel.categories){
-                for(int i=1; i <= seatNumbers[0]; i++){
-                    for(int j=0; j < seatNumbers[1]; j++){
-                        String key = String.valueOf(i) + (char)('A'+j);
-                        seats.put(key, new Seat(i, (char) ('A' + j),c));
+    public void removePassenger(Passenger p) {
+        if (passengers.get(p.getName()) != null) {
+            passengers.remove(p.getName());
+        } else {
+            throw new PassengerNotFoundException();
+        }
+    }
+
+    public void addPassenger(Passenger p) {
+        if (passengers.get(p.getName()) == null) {
+            passengers.put(p.getName(), p);
+        } else {
+            throw new PassengerAlreadyInFlightException();
+        }
+    }
+
+    private void generateSeats() {
+        for (Category c : Category.values()) {
+            for (int[] seatNumbers : planeModel.categories) {
+                for (int i = 1; i <= seatNumbers[0]; i++) {
+                    for (int j = 0; j < seatNumbers[1]; j++) {
+                        String key = String.valueOf(i) + (char) ('A' + j);
+                        seats.put(key, new Seat(i, (char) ('A' + j), c));
                     }
                 }
             }
         }
     }
+
+    public int getCategoryCapacity(Category category) {
+        int capacity = 0;
+        for (Seat seat : seats.values()) {
+            if (seat.isEmpty() && seat.getCategory() == category) {
+                capacity++;
+            }
+        }
+        return capacity;
+    }
+
 }
