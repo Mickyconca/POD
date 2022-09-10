@@ -1,13 +1,10 @@
 package ar.edu.itba.pod.server.Servant;
 
 import ar.edu.itba.pod.exceptions.FlightNotFoundException;
-import ar.edu.itba.pod.flight.Flight;
-import ar.edu.itba.pod.flight.FlightStatus;
-import ar.edu.itba.pod.flight.PlaneModel;
+import ar.edu.itba.pod.flight.*;
+import javafx.collections.transformation.SortedList;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Data {
@@ -27,10 +24,20 @@ public class Data {
         return flight;
     }
 
-    public List<Flight> getAlternatives(String destination){
-        return flights.values().stream().filter(f ->
-                f.getDestination().equals(destination) && f.getStatus() == FlightStatus.PENDING)
-                .collect(Collectors.toList());
+    public List<AlternativeFlight> getAlternatives(String destination, Passenger passenger){
+        List<AlternativeFlight> alternatives = new LinkedList<>();
+        for(Flight flight : flights.values()){
+            if(flight.getDestination().equals(destination) && flight.getStatus() == FlightStatus.PENDING){
+                for(int cat = passenger.getCategory().getCategoryId() ; cat < Category.values().length ; cat++){
+                    int capacity = flight.getCategoryCapacity(Category.getCategoryById(cat));
+                    if(capacity > 0){
+                        alternatives.add(new AlternativeFlight(flight, Category.getCategoryById(cat),capacity));
+                    }
+                }
+            }
+        }
+        Collections.sort(alternatives);
+        return alternatives;
     }
 
     public Map<String, PlaneModel> getPlaneModels() {

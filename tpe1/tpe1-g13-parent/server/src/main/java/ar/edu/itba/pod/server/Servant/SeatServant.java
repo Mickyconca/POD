@@ -11,10 +11,11 @@ import org.slf4j.Logger;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SeatServant implements SeatService, Serializable {
 
-    private Data data;
+    private final Data data;
 
     public SeatServant(Data data) {
         this.data = data;
@@ -78,15 +79,31 @@ public class SeatServant implements SeatService, Serializable {
     @Override
     public List<String> alternatives(String flightCode, String passenger) throws RemoteException {
         Flight f = this.data.getFlightByCode(flightCode);
-        List<Flight> alternativeFlights = data.getAlternatives(f.getDestination());
-        List<String> results = new LinkedList<>();
-        for(Flight flight: alternativeFlights) {
-            results.add("flight.getDestination()" + "\t|\t" + flight.getFlightCode() + "\t|\t" + flight.getSeat() )
-        }
+        Passenger p = f.getPassenger(passenger);
+        List<AlternativeFlight> alternativeFlights = data.getAlternatives(f.getDestination(),p);
+        return alternativeFlights.stream().map(AlternativeFlight::toString).collect(Collectors.toList());
     }
 
     @Override
     public void changeTicket(String originalFlightCode, String alternativeFlightCode, String passenger) throws RemoteException {
+        Flight f = this.data.getFlightByCode(originalFlightCode);
+        Passenger p = f.getPassenger(passenger);
 
+        if(f.getStatus() != FlightStatus.CONFIRMED) {
+
+            List<AlternativeFlight> alternativeFlights = data.getAlternatives(f.getDestination(), p);
+            boolean exists = alternativeFlights.stream().anyMatch((AlternativeFlight af) -> af.getFlight().getFlightCode().equals(alternativeFlightCode));
+            Optional<AlternativeFlight> alternativeFlight = alternativeFlights.stream().filter((AlternativeFlight af) -> af.getFlight().getFlightCode().equals(alternativeFlightCode)).findFirst();
+            if (alternativeFlight.isPresent()) {
+                if(p.hasSeatAssigned()){
+                    p.getSeat().setEmpty(true);
+                    p.setSeat(null);
+                }
+                f.removePassenger(p);
+                alternativeFlight.get().getFlight().addPassenger(p);
+            }
+            throw new FlightNotFoundException();
+        }
+        throw new FlightAlreadyConfirmedException();
     }
 }

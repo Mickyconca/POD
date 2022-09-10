@@ -13,6 +13,10 @@ public enum Category {
         this.id = id;
     }
 
+    public static Category getCategoryById(int id){
+        return Category.values()[id];
+    }
+
     public int getCategoryId(){
         return id;
     }
