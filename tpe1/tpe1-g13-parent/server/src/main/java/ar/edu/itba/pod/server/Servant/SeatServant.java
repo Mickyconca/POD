@@ -28,7 +28,6 @@ public class SeatServant implements SeatService, Serializable {
             }
             throw new SeatNotFoundException();
         }
-        throw new FlightNotFoundException();
     }
 
     @Override

@@ -131,8 +131,8 @@ public class AdminClient {
             // TODO fix catch
             try {
                 flightAdminService.registerPlaneModel(line.get(0),businessSeats, premiumSeats, economySeats);
-            } catch (RemoteException exception) {
-                System.out.print("Exception");
+            } catch (Exception exception) {
+                System.out.print(exception.getMessage());
             }
         }
 

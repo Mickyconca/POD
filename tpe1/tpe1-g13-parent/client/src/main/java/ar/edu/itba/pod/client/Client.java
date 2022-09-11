@@ -18,6 +18,5 @@ public class Client {
         logger.info("tpe1 Client Starting ...");
 
         FlightAdminService handle = (FlightAdminService) Naming.lookup("//localhost:1099/pod");
-        System.out.println(handle.print());
     }
 }
