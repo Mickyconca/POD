@@ -21,13 +21,11 @@ public class SeatServant implements SeatService, Serializable {
     @Override
     public boolean status(String flightCode, int rowNumber, char colLetter, String passenger) throws RemoteException {
         Flight flight = this.data.getFlightByCode(flightCode);
-        if (flight != null) {
-            Seat seat = flight.getSeat(rowNumber, colLetter);
-            if (seat != null) {
-                return seat.isEmpty();
-            }
-            throw new SeatNotFoundException();
+        Seat seat = flight.getSeat(rowNumber, colLetter);
+        if (seat != null) {
+            return seat.isEmpty();
         }
+        throw new SeatNotFoundException();
     }
 
     @Override
@@ -63,7 +61,7 @@ public class SeatServant implements SeatService, Serializable {
                 try {
                     passengerInfo.setSeat(null);
                     assign(flightCode, rowNumber, colLetter, passenger);
-                    seatMovedNotification(flight,passengerInfo,oldSeat);
+                    seatMovedNotification(flight, passengerInfo, oldSeat);
                 } catch (Exception e) {
                     passengerInfo.setSeat(oldSeat);
                     e.printStackTrace();
@@ -98,7 +96,7 @@ public class SeatServant implements SeatService, Serializable {
                 }
                 oldFlight.removePassenger(p);
                 alternativeFlight.get().getFlight().addPassenger(p);
-                changeTicketNotification(oldFlight, alternativeFlight.get().getFlight(),p);
+                changeTicketNotification(oldFlight, alternativeFlight.get().getFlight(), p);
             }
             throw new FlightNotFoundException();
         }
@@ -113,17 +111,17 @@ public class SeatServant implements SeatService, Serializable {
         }
     }
 
-    private void seatMovedNotification(Flight flight, Passenger passenger, Seat oldSeat){
+    private void seatMovedNotification(Flight flight, Passenger passenger, Seat oldSeat) {
         if (data.getPassengersNotifications().containsKey(passenger.getName()) && data.getPassengersNotifications().get(passenger.getName()).containsKey(flight.getFlightCode())) {
             for (NotificationsServiceClient handler : data.getPassengersNotifications().get(passenger.getName()).get(flight.getFlightCode())) {
-                handler.onSeatChanged(oldSeat.getCategory().getCategory(), oldSeat.getRowNumber(),oldSeat.getColLetter(), passenger.getSeat().getCategory().getCategory(),passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
+                handler.onSeatChanged(oldSeat.getCategory().getCategory(), oldSeat.getRowNumber(), oldSeat.getColLetter(), passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
             }
         }
     }
 
-    private void changeTicketNotification(Flight oldFlight, Flight newFlight, Passenger passenger){
+    private void changeTicketNotification(Flight oldFlight, Flight newFlight, Passenger passenger) {
         if (data.getPassengersNotifications().containsKey(passenger.getName()) && data.getPassengersNotifications().get(passenger.getName()).containsKey(oldFlight.getFlightCode())) {
-            for (NotificationsServiceClient handler : data.getPassengersNotifications().get(passenger.getName()).get(oldFlight.getFlightCode())){
+            for (NotificationsServiceClient handler : data.getPassengersNotifications().get(passenger.getName()).get(oldFlight.getFlightCode())) {
                 data.getPassengersNotifications().get(passenger.getName()).remove(oldFlight.getFlightCode());
                 data.getPassengersNotifications().get(passenger.getName()).putIfAbsent(newFlight.getFlightCode(), new LinkedList<>());
                 data.getPassengersNotifications().get(passenger.getName()).get(newFlight.getFlightCode()).add(handler);
