@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface SeatsQueryService extends Remote {
     List<List<String>> flightSeats(String flightCode) throws RemoteException;
-    List<List<String>> flightSeatsBycategory(String flightCode, Category category) throws RemoteException;
-    List<List<String>> flightSeatsByRow(String flightCode, int rowNumber) throws RemoteException;
+    List<List<String>> flightSeatsByCategory(String flightCode, Category category) throws RemoteException;
+    List<String> flightSeatsByRow(String flightCode, int rowNumber) throws RemoteException;
 
 }

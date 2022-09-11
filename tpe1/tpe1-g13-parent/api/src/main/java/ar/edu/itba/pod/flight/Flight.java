@@ -12,7 +12,7 @@ public class Flight {
     private final String destination;
     private final PlaneModel planeModel;
     private FlightStatus status;
-    private Map<String, Seat> seats = new HashMap<>();
+    private Map<Integer, Map<Character, Seat>> seats = new HashMap<>();
     private Map<String, Passenger> passengers;
 
     public Flight(PlaneModel planeModel, String flightCode, String destination, Map<String, Passenger> passengers) {
@@ -44,11 +44,11 @@ public class Flight {
         return planeModel;
     }
 
-    public Map<String, Seat> getSeats() {
+    public Map<Integer, Map<Character, Seat>> getSeats() {
         return seats;
     }
 
-    public void setSeats(Map<String, Seat> seats) {
+    public void setSeats(Map<Integer, Map<Character, Seat>> seats) {
         this.seats = seats;
     }
 
@@ -69,8 +69,7 @@ public class Flight {
     }
 
     public Seat getSeat(int rowNumber, char colLetter) {
-        String key = rowNumber + String.valueOf(colLetter);
-        Seat seat = seats.get(key);
+        Seat seat = seats.get(rowNumber).get(colLetter);
         if (seat == null) {
             throw new SeatNotFoundException();
         }
@@ -97,9 +96,9 @@ public class Flight {
         for (Category c : Category.values()) {
             for (int[] seatNumbers : planeModel.categories) {
                 for (int i = 1; i <= seatNumbers[0]; i++) {
+                    seats.put(i,new HashMap<>());
                     for (int j = 0; j < seatNumbers[1]; j++) {
-                        String key = String.valueOf(i) + (char) ('A' + j);
-                        seats.put(key, new Seat(i, (char) ('A' + j), c));
+                        seats.get(i).put((char) ('A'+j),  new Seat(i, (char) ('A' + j), c) );
                     }
                 }
             }
@@ -108,9 +107,9 @@ public class Flight {
 
     public int getCategoryCapacity(Category category) {
         int capacity = 0;
-        for (Seat seat : seats.values()) {
-            if (seat.isEmpty() && seat.getCategory() == category) {
-                capacity++;
+        for (Map<Character, Seat> columns : seats.values()) {
+            if(!columns.isEmpty() && columns.get('A').getCategory() == category){ //if it's not empty, first letter is A
+                capacity+=columns.size(); //all columns belong to the same category
             }
         }
         return capacity;

@@ -2,10 +2,8 @@ package ar.edu.itba.pod.server.Servant;
 
 import ar.edu.itba.pod.exceptions.FlightNotFoundException;
 import ar.edu.itba.pod.flight.*;
-import javafx.collections.transformation.SortedList;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Data {
     private Map<String, PlaneModel> planeModels;

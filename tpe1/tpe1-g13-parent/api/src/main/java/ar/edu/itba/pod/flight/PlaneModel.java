@@ -66,4 +66,21 @@ public class PlaneModel {
     public void setEconomySeats(int[] economySeats) {
         this.economySeats = economySeats;
     }
+
+    public int[] getCategoryRowIndexes(Category category){
+        int[] results = new int[2];
+        if(category == Category.BUSINESS){
+            results[0] = 1;
+            results[1] = businessSeats[0];
+            return results;
+        }else if(category == Category.PREMIUM) {
+            results[0] = businessSeats[0] + 1;
+            results[1] = businessSeats[0] + premiumSeats[0];
+            return results;
+        }else{
+            results[0] = businessSeats[0] + premiumSeats[0] + 1;
+            results[1] = businessSeats[0] + premiumSeats[0] + economySeats[0];
+        }
+        return results;
+    }
 }
