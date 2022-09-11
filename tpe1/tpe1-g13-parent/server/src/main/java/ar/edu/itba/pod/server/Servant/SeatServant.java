@@ -1,12 +1,8 @@
 package ar.edu.itba.pod.server.Servant;
 
 import ar.edu.itba.pod.exceptions.*;
-import ar.edu.itba.pod.flight.Flight;
 import ar.edu.itba.pod.flight.FlightStatus;
-import ar.edu.itba.pod.flight.Passenger;
-import ar.edu.itba.pod.flight.Seat;
 import ar.edu.itba.pod.services.SeatService;
-import org.slf4j.Logger;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;

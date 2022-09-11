@@ -1,8 +1,10 @@
-package ar.edu.itba.pod.flight;
+package ar.edu.itba.pod.server.Servant;
 
 import ar.edu.itba.pod.exceptions.PassengerAlreadyInFlightException;
 import ar.edu.itba.pod.exceptions.PassengerNotFoundException;
 import ar.edu.itba.pod.exceptions.SeatNotFoundException;
+import ar.edu.itba.pod.flight.Category;
+import ar.edu.itba.pod.flight.FlightStatus;
 
 import java.util.*;
 

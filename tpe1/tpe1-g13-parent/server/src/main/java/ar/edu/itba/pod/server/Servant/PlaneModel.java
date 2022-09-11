@@ -1,4 +1,6 @@
-package ar.edu.itba.pod.flight;
+package ar.edu.itba.pod.server.Servant;
+
+import ar.edu.itba.pod.flight.Category;
 
 import java.util.ArrayList;
 import java.util.List;

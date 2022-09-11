@@ -2,9 +2,6 @@ package ar.edu.itba.pod.server.Servant;
 
 import ar.edu.itba.pod.exceptions.PassengerNotFoundException;
 import ar.edu.itba.pod.flight.Category;
-import ar.edu.itba.pod.flight.Flight;
-import ar.edu.itba.pod.flight.Passenger;
-import ar.edu.itba.pod.flight.Seat;
 import ar.edu.itba.pod.services.SeatsQueryService;
 
 import java.rmi.RemoteException;

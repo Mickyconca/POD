@@ -35,7 +35,14 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
 
     //Boeing 787;AA100;JFK;BUSINESS#John,ECONOMY#Juliet,BUSINESS#Elizabeth
     @Override
-    public void registerFlight(String modelName, String flightCode, String destinyAirport, Map<String, Passenger> passengers) throws RemoteException {
+    public void registerFlight(String modelName, String flightCode, String destinyAirport, Map<Category, Set<String>> passengers) throws RemoteException {
+        Map<String, Passenger> formattedPassengers = new HashMap<>();
+        for(Map.Entry<Category, Set<String>> entry : passengers.entrySet()){
+            for(String p : entry.getValue()){
+                formattedPassengers.put(p,new Passenger(p,entry.getKey()));
+            }
+        }
+
         synchronized (flightsLock) {
             if (data.getFlights().containsKey(flightCode)) {
                 throw new DuplicateFlightCodeException();
@@ -44,11 +51,7 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
                 throw new ModelNotFoundException();
             }
             PlaneModel planeModel = data.getPlaneModels().get(modelName);
-            int capacity = planeModel.getTotalCapacity();
-            if (passengers.size() > capacity) { //todo check this
-                throw new InvalidAmountOfPassengersException();
-            }
-            this.data.getFlights().put(flightCode, new Flight(planeModel, flightCode, destinyAirport, passengers));
+            this.data.getFlights().put(flightCode, new Flight(planeModel, flightCode, destinyAirport, formattedPassengers));
         }
     }
 

@@ -1,9 +1,6 @@
 package ar.edu.itba.pod.server.Servant;
 
 import ar.edu.itba.pod.flight.Category;
-import ar.edu.itba.pod.flight.Flight;
-
-import java.util.Comparator;
 
 public class AlternativeFlight implements Comparable<AlternativeFlight> {
     private final Flight flight;
