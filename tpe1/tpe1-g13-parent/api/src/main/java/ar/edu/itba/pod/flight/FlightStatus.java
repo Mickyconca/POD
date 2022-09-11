@@ -20,4 +20,5 @@ public enum FlightStatus {
     public int getCode() {
         return code;
     }
+
 }

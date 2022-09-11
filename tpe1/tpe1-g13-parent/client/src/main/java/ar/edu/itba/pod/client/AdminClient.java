@@ -1,5 +1,9 @@
 package ar.edu.itba.pod.client;
 
+import ar.edu.itba.pod.exceptions.DuplicateFlightCodeException;
+import ar.edu.itba.pod.exceptions.DuplicateModelException;
+import ar.edu.itba.pod.exceptions.InvalidModelException;
+import ar.edu.itba.pod.exceptions.ModelNotFoundException;
 import ar.edu.itba.pod.flight.Category;
 import ar.edu.itba.pod.services.FlightAdminService;
 import org.slf4j.Logger;
@@ -35,7 +39,6 @@ public class AdminClient {
             logger.error("Invalid port number");
             return;
         }
-
         //get action
         final String action;
         try{
@@ -128,11 +131,10 @@ public class AdminClient {
                         break;
                 }
             }
-            // TODO fix catch
             try {
                 flightAdminService.registerPlaneModel(line.get(0),businessSeats, premiumSeats, economySeats);
-            } catch (Exception exception) {
-                System.out.print(exception.getMessage());
+            } catch (RemoteException | DuplicateModelException | InvalidModelException exception) {
+                logger.error(exception.getMessage());
             }
         }
 
@@ -156,8 +158,8 @@ public class AdminClient {
             // TODO fix catch
             try {
                 flightAdminService.registerFlight(flightsLine.get(0), flightsLine.get(1), flightsLine.get(2), tickets);
-            } catch (RemoteException exception) {
-                System.out.print("Exception");
+            } catch (RemoteException | DuplicateFlightCodeException | ModelNotFoundException exception) {
+                logger.error(exception.getMessage());
             }
         }
 

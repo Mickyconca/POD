@@ -13,15 +13,15 @@ public enum Category {
         this.id = id;
     }
 
-    public static Category getCategoryById(int id){
+    public static Category getCategoryById(int id) {
         return Category.values()[id];
     }
 
-    public int getCategoryId(){
+    public int getCategoryId() {
         return id;
     }
 
-    public String getCategory(){
+    public String getCategory() {
         return category;
     }
 }

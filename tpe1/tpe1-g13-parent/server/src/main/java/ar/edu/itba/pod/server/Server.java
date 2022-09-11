@@ -1,9 +1,11 @@
 package ar.edu.itba.pod.server;
 
 import ar.edu.itba.pod.server.Servant.Data;
+import ar.edu.itba.pod.server.Servant.NotificationsServant;
 import ar.edu.itba.pod.server.Servant.SeatServant;
 import ar.edu.itba.pod.services.FlightAdminService;
 import ar.edu.itba.pod.server.Servant.FlightAdminServant;
+import ar.edu.itba.pod.services.NotificationsServiceServer;
 import ar.edu.itba.pod.services.SeatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +24,13 @@ public class Server {
             Data data = new Data();
             FlightAdminService stubFlightAdmin = new FlightAdminServant(data);
             SeatService stubSeat = new SeatServant(data);
-            final Remote remote = UnicastRemoteObject.exportObject(stubFlightAdmin,0);
+            NotificationsServiceServer stubNotificationsService = new NotificationsServant(data);
+            final Remote remoteFlightAdmin = UnicastRemoteObject.exportObject(stubFlightAdmin,0);
+            final Remote remoteNotificationsService = UnicastRemoteObject.exportObject(stubNotificationsService,1);
             Registry registry = LocateRegistry.getRegistry("localhost", 1099);
-            registry.rebind("FlightAdminService", remote);
+            registry.rebind("FlightAdminService", remoteFlightAdmin);
+            registry.rebind("NotificationsService", remoteNotificationsService);
+            //TODO agregar todos los services y ver que onda el port
             System.out.println("Service bound");
         } catch (Exception e) {
             e.printStackTrace();
