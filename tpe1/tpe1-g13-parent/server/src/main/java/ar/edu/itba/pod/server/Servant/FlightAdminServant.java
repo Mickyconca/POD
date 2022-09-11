@@ -3,6 +3,7 @@
 import ar.edu.itba.pod.exceptions.*;
 import ar.edu.itba.pod.flight.*;
 import ar.edu.itba.pod.services.FlightAdminService;
+import ar.edu.itba.pod.services.NotificationsServiceClient;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
@@ -72,6 +73,7 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
                 throw new FlightNotFoundException();
             }
             data.getFlights().get(flightCode).setStatus(FlightStatus.CONFIRMED);
+            handleStatusChangeNotifications(data.getFlights().get(flightCode));
         }
     }
 
@@ -82,6 +84,7 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
                 throw new FlightNotFoundException();
             }
             data.getFlights().get(flightCode).setStatus(FlightStatus.CANCELLED);
+            handleStatusChangeNotifications(data.getFlights().get(flightCode));
         }
     }
 
@@ -122,6 +125,30 @@ public class FlightAdminServant implements FlightAdminService, Serializable {
         originalFlight.removePassenger(passenger);
         alternativeFlight.getFlight().addPassenger(passenger);
     }
+
+    private void handleStatusChangeNotifications(final Flight flight){
+        List<String> passengersWithNotifications = flight.getPassengers().keySet().stream().filter(key -> data.getPassengersNotifications().containsKey(key)
+                && data.getPassengersNotifications().get(key).containsKey(flight.getFlightCode())).collect(Collectors.toList());
+        Passenger passenger;
+        for (String p : passengersWithNotifications){
+            passenger = flight.getPassenger(p);
+            for(NotificationsServiceClient handler : data.getPassengersNotifications().get(p).get(flight.getFlightCode())){
+                if(passenger.hasSeatAssigned()){
+                    handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), passenger.getSeat().getCategory().getCategory(),passenger.getSeat().getRowNumber(),passenger.getSeat().getColLetter());
+                }else{
+                    handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), passenger.getCategory().getCategory(),null,null);
+                }
+                if(flight.getStatus() == FlightStatus.CONFIRMED){
+                    data.getPassengersNotifications().get(p).remove(flight.getFlightCode());
+                    if (data.getPassengersNotifications().get(p).isEmpty()){ //todo check if this is ok
+                        data.getPassengersNotifications().remove(p);
+                    }
+                }
+            }
+        }
+    }
+
+
 }
 
 

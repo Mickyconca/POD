@@ -2,16 +2,19 @@ package ar.edu.itba.pod.server.Servant;
 
 import ar.edu.itba.pod.exceptions.FlightNotFoundException;
 import ar.edu.itba.pod.flight.*;
+import ar.edu.itba.pod.services.NotificationsServiceClient;
 
 import java.util.*;
 
 public class Data {
     private Map<String, PlaneModel> planeModels;
     private Map<String, Flight> flights;
+    private Map<String, Map<String,List<NotificationsServiceClient>>> passengersNotifications; //Map<passengerName,<flightCode,handler>>
 
     public Data() {
         this.flights = new HashMap<>();
         this.planeModels = new HashMap<>();
+        this.passengersNotifications = new HashMap<>();
     }
 
     public Flight getFlightByCode(String flightCode){
@@ -52,5 +55,13 @@ public class Data {
 
     public void setFlights(Map<String, Flight> flights) {
         this.flights = flights;
+    }
+
+    public Map<String, Map<String, List<NotificationsServiceClient>>> getPassengersNotifications() {
+        return passengersNotifications;
+    }
+
+    public void setPassengersNotifications(Map<String, Map<String, List<NotificationsServiceClient>>> passengersNotifications) {
+        this.passengersNotifications = passengersNotifications;
     }
 }
