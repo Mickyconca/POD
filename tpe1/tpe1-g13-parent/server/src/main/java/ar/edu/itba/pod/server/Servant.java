@@ -10,7 +10,7 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Servant implements FlightAdminService, NotificationsServiceServer, SeatService, SeatsQueryService {
+public class Servant implements FlightService {
     private final Map<String, PlaneModel> planeModels = new HashMap<>();
     private final Map<String, Flight> flights = new HashMap<>();
     private final Map<String, Map<String, List<NotificationsServiceClient>>> passengersNotifications = new HashMap<>(); //Map<passengerName,<flightCode,handler>>

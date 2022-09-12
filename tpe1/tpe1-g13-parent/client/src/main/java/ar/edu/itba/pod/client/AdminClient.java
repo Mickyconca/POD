@@ -59,7 +59,8 @@ public class AdminClient {
             logger.error("Missing input file");
             return;
         }
-        final FlightAdminService flightAdminService = (FlightAdminService) Naming.lookup("//" + serverAddress.getServerAddress() + "/" + FlightAdminService.class.getName())
+        final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
+        FlightAdminService flightAdminService = (FlightAdminService) registry.lookup(FlightAdminService.class.getName());
         runAction(flightAdminService,action, inPath);
 
 
@@ -70,7 +71,6 @@ public class AdminClient {
 
         switch (action) {
             case "models":
-                System.out.println("ENTRE :D");
                 addPlaneModels(flightAdminService, inPath);
                 break;
             case "flights":

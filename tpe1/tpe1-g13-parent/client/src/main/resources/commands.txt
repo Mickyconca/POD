@@ -1,1 +1,8 @@
 ./run-admin.sh -DserverAddress=10.6.0.1:1099 -Daction=models -DinPath="/Users/martirodriguez/Documents/ITBA/POD/POD/tpe1/tpe1-g13-parent/client/src/main/resources/modelos.csv"
+
+./run-admin.sh -DserverAddress=localhost:1099 -Daction=models -DinPath="/Users/martirodriguez/Documents/ITBA/POD/POD/tpe1/tpe1-g13-parent/client/src/main/resources/modelos.csv"
+
+./run-admin.sh -DserverAddress=localhost:1099 -Daction=flights -DinPath="/Users/martirodriguez/Documents/ITBA/POD/POD/tpe1/tpe1-g13-parent/client/src/main/resources/vuelos.csv"
+
+
+./run-seatAssign.sh -DserverAddress=localhost:1099 -Daction=status -Dflight=AA100 -Drow=2 -Dcol=C
