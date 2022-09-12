@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -30,12 +31,12 @@ public class AdminClient {
     public static void main(String[] args) throws IOException, NotBoundException{
         logger.info("Flight Admin Client starting..");
         final Properties properties = System.getProperties();
-
         //get server address & port
         final Utils.ServerAddress serverAddress;
         try {
             serverAddress = serverAddressParser(Optional.ofNullable(properties.getProperty("serverAddress")).orElseThrow(IllegalArgumentException::new));
         }catch (NumberFormatException e){
+            System.out.println("Invalid port number");
             logger.error("Invalid port number");
             return;
         }
@@ -44,6 +45,7 @@ public class AdminClient {
         try{
             action = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
+            System.out.println("Missing action.");
             logger.error("Missing action.");
             return;
         }
@@ -53,13 +55,11 @@ public class AdminClient {
             inPath=Optional.ofNullable(properties.getProperty("inPath"))
                     .orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException ex){
+            System.out.println("Missing input file");
             logger.error("Missing input file");
             return;
         }
-
-        final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
-        final FlightAdminService flightAdminService = (FlightAdminService) registry.lookup("FlightAdminService");
-
+        final FlightAdminService flightAdminService = (FlightAdminService) Naming.lookup("//" + serverAddress.getServerAddress() + "/" + FlightAdminService.class.getName())
         runAction(flightAdminService,action, inPath);
 
 
@@ -70,6 +70,7 @@ public class AdminClient {
 
         switch (action) {
             case "models":
+                System.out.println("ENTRE :D");
                 addPlaneModels(flightAdminService, inPath);
                 break;
             case "flights":

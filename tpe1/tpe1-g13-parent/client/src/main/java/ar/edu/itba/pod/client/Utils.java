@@ -23,5 +23,9 @@ public class Utils {
         public String getIp(){
             return ip;
         }
+
+        public String getServerAddress(){
+            return ip + ":" + port;
+        }
     }
 }

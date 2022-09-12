@@ -53,7 +53,7 @@ public class NotificationsClient{
 
             final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
             NotificationsServiceClient notificationsHandler = new NotificationsHandler();
-            NotificationsServiceServer notificationsService = (NotificationsServiceServer) registry.lookup("NotificationsService");
+            NotificationsServiceServer notificationsService = (NotificationsServiceServer) registry.lookup("NotificationsServiceServer");
             notificationsService.registerPassengerForNotifications(passenger, flight, notificationsHandler);
             
     }

@@ -77,7 +77,7 @@ public class SeatsManagerClient {
         }
 
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
-        final SeatService seatService = (SeatService) registry.lookup("SeatsManagerClient");
+        final SeatService seatService = (SeatService) registry.lookup("SeatService");
 
         runAction(seatService,action, flight, row, col, passenger, originalFlight);
     }

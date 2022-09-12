@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.server.Servant;
+package ar.edu.itba.pod.server.models;
 
 import ar.edu.itba.pod.exceptions.PassengerNotFoundException;
 import ar.edu.itba.pod.flight.Category;
