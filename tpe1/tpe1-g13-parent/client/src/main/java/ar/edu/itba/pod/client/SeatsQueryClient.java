@@ -4,8 +4,6 @@ import ar.edu.itba.pod.exceptions.FlightNotFoundException;
 import ar.edu.itba.pod.flight.Category;
 import ar.edu.itba.pod.services.SeatsQueryService;
 import com.opencsv.CSVWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.rmi.NotBoundException;
@@ -19,10 +17,9 @@ import static ar.edu.itba.pod.client.Utils.serverAddressParser;
 
 
 public class SeatsQueryClient {
-    private static final Logger logger = LoggerFactory.getLogger(SeatsQueryClient.class);
 
     public static void main(String[] args) throws IOException, NotBoundException {
-        logger.info("Seats query client starting...");
+        System.out.println("Seats query client starting...");
         final Properties properties = System.getProperties();
 
         final Utils.ServerAddress serverAddress;

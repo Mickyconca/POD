@@ -6,13 +6,10 @@ import ar.edu.itba.pod.exceptions.InvalidModelException;
 import ar.edu.itba.pod.exceptions.ModelNotFoundException;
 import ar.edu.itba.pod.flight.Category;
 import ar.edu.itba.pod.services.FlightAdminService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -26,10 +23,9 @@ import static ar.edu.itba.pod.client.Utils.serverAddressParser;
 //./run-admin -DserverAddress=10.6.0.1:1099 -Daction=flights-DinPath=../vuelos.csv
 
 public class AdminClient {
-    private static final Logger logger = LoggerFactory.getLogger(AdminClient.class);
 
     public static void main(String[] args) throws IOException, NotBoundException{
-        logger.info("Flight Admin Client starting..");
+        System.out.println("Flight Admin Client starting..");
         final Properties properties = System.getProperties();
         //get server address & port
         final Utils.ServerAddress serverAddress;

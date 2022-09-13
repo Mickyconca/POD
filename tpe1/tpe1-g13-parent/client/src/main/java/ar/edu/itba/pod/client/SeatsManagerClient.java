@@ -2,8 +2,6 @@ package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.exceptions.*;
 import ar.edu.itba.pod.services.SeatService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -14,7 +12,6 @@ import java.util.*;
 import static ar.edu.itba.pod.client.Utils.serverAddressParser;
 
 public class SeatsManagerClient {
-    private static final Logger logger = LoggerFactory.getLogger(SeatsManagerClient.class);
 
     public static void main(String[] args) throws IOException, NotBoundException {
         System.out.println("Seats Manager Client starting..");
