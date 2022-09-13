@@ -31,7 +31,7 @@ public class NotificationsClient{
             try {
                 serverAddress = serverAddressParser(Optional.ofNullable(properties.getProperty("serverAddress")).orElseThrow(IllegalArgumentException::new));
             } catch (NumberFormatException e) {
-                logger.error("Invalid port number");
+                System.out.println("Invalid port number");
                 return;
             }
 
@@ -39,7 +39,7 @@ public class NotificationsClient{
             try {
                 flight = Optional.ofNullable(properties.getProperty("flight")).orElseThrow(IllegalArgumentException::new);
             } catch (IllegalArgumentException e) {
-                logger.error("Missing flight.");
+                System.out.println("Missing flight.");
                 return;
             }
 
@@ -47,7 +47,7 @@ public class NotificationsClient{
             try {
                 passenger = Optional.ofNullable(properties.getProperty("passenger")).orElseThrow(IllegalArgumentException::new);
             } catch (IllegalArgumentException e) {
-                logger.error("Missing passenger.");
+                System.out.println("Missing passenger.");
                 return;
             }
 

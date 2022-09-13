@@ -17,14 +17,14 @@ public class SeatsManagerClient {
     private static final Logger logger = LoggerFactory.getLogger(SeatsManagerClient.class);
 
     public static void main(String[] args) throws IOException, NotBoundException {
-        logger.info("Seats Manager Client starting..");
+        System.out.println("Seats Manager Client starting..");
         final Properties properties = System.getProperties();
 
         final Utils.ServerAddress serverAddress;
         try {
             serverAddress = serverAddressParser(Optional.ofNullable(properties.getProperty("serverAddress")).orElseThrow(IllegalArgumentException::new));
         }catch (NumberFormatException e){
-            logger.error("Invalid port number");
+            System.out.println("Invalid port number");
             return;
         }
 
@@ -32,7 +32,7 @@ public class SeatsManagerClient {
         try{
             action = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            logger.error("Missing action.");
+            System.out.println("Missing action.");
             return;
         }
 
@@ -40,7 +40,7 @@ public class SeatsManagerClient {
         try{
             flight = Optional.ofNullable(properties.getProperty("flight")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            logger.error("Missing flight.");
+            System.out.println("Missing flight.");
             return;
         }
 
@@ -48,7 +48,7 @@ public class SeatsManagerClient {
         try{
             passenger = Optional.ofNullable(properties.getProperty("passenger")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            logger.error("Missing passenger.");
+            System.out.println("Missing passenger.");
             return;
         }
 
@@ -56,7 +56,7 @@ public class SeatsManagerClient {
         try{
             row = Integer.parseInt(Optional.ofNullable(properties.getProperty("row")).orElseThrow(IllegalArgumentException::new));
         }catch (IllegalArgumentException e){
-            logger.error("Missing row.");
+            System.out.println("Missing row.");
             return;
         }
 
@@ -64,7 +64,7 @@ public class SeatsManagerClient {
         try{
             col = Optional.ofNullable(properties.getProperty("col")).orElseThrow(IllegalArgumentException::new).toCharArray()[0];
         }catch (IllegalArgumentException e){
-            logger.error("Missing col.");
+            System.out.println("Missing col.");
             return;
         }
 
@@ -72,7 +72,7 @@ public class SeatsManagerClient {
         try{
             originalFlight = Optional.ofNullable(properties.getProperty("originalFlight")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            logger.error("Missing originalFlight.");
+            System.out.println("Missing originalFlight.");
             return;
         }
 
@@ -103,7 +103,7 @@ public class SeatsManagerClient {
                 changeTicket(seatService, originalFlight, flight, passenger);
                 break;
             default:
-                logger.error("Invalid action");
+                System.out.println("Invalid action");
                 break;
         }
     }
@@ -113,7 +113,7 @@ public class SeatsManagerClient {
         try {
              status = seatService.status(flightCode, row, col, passenger);
         } catch(SeatNotFoundException | FlightNotFoundException | RemoteException exception){
-            logger.error(exception.getMessage());
+            System.out.println(exception.getMessage());
         }
         System.out.printf("Seat %d%c is " + (status ? "FREE" : "OCCUPIED") + ".%n", row, col);
     }
@@ -122,7 +122,7 @@ public class SeatsManagerClient {
         try {
             seatService.assign(flightCode, row, col, passenger);
         } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | PassengerWithSeatAlreadyAssignedException | InvalidSeatCategoryException | SeatNotEmptyException exception){
-            logger.error(exception.getMessage());
+            System.out.println(exception.getMessage());
         }
         System.out.printf("Seat %d%c is assigned to %s", row, col, passenger);
     }
@@ -152,7 +152,7 @@ public class SeatsManagerClient {
         try {
             seatService.changeTicket(originalFlightCode, alternativeFlightCode, passenger);
         } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | FlightAlreadyConfirmedException exception) {
-            logger.error(exception.getMessage());
+            System.out.println(exception.getMessage());
         }
         System.out.printf("Your ticket changed to Flight %s from Flight %s.%n.",alternativeFlightCode,originalFlightCode);
     }

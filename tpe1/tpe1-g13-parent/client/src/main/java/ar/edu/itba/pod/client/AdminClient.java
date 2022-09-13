@@ -37,7 +37,7 @@ public class AdminClient {
             serverAddress = serverAddressParser(Optional.ofNullable(properties.getProperty("serverAddress")).orElseThrow(IllegalArgumentException::new));
         }catch (NumberFormatException e){
             System.out.println("Invalid port number");
-            logger.error("Invalid port number");
+            System.out.println("Invalid port number");
             return;
         }
         //get action
@@ -46,7 +46,7 @@ public class AdminClient {
             action = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
             System.out.println("Missing action.");
-            logger.error("Missing action.");
+            System.out.println("Missing action.");
             return;
         }
 
@@ -56,7 +56,7 @@ public class AdminClient {
                     .orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException ex){
             System.out.println("Missing input file");
-            logger.error("Missing input file");
+            System.out.println("Missing input file");
             return;
         }
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
@@ -89,7 +89,7 @@ public class AdminClient {
                 //reticketing fn
                 break;
             default:
-                logger.error("Invalid action");
+                System.out.println("Invalid action");
                 break;
         }
     }
@@ -104,7 +104,7 @@ public class AdminClient {
                     .map(line->Arrays.asList(line.split(";")))
                     .collect(Collectors.toList());
         }catch (IOException e){
-            logger.error("Error parsing file {}", inPath);
+            System.out.printf("Error parsing file %s\n", inPath);
         }
         for (List<String> line : planeModelsLines){
             //parse list of seats
@@ -115,7 +115,7 @@ public class AdminClient {
             for(String info : seatsInfo){
                 String[] tokens = info.split("#");
                 if(tokens.length > 3){
-                    logger.error("Error in file"); //todo complete error
+                    System.out.println("Error in file"); //todo complete error
                 }
                 switch (tokens[0]) {
                     case "BUSINESS":
@@ -135,7 +135,7 @@ public class AdminClient {
             try {
                 flightAdminService.registerPlaneModel(line.get(0),businessSeats, premiumSeats, economySeats);
             } catch (RemoteException | DuplicateModelException | InvalidModelException exception) {
-                logger.error(exception.getMessage());
+                System.out.println(exception.getMessage());
             }
         }
 
@@ -151,7 +151,7 @@ public class AdminClient {
                     .map(line->Arrays.asList(line.split(";")))
                     .collect(Collectors.toList());
         }catch(IOException e) {
-            logger.error("Error parsing file {}", inPath);
+            System.out.printf("Error parsing file %s\n", inPath);
         }
 
         for (List<String> flightsLine : flightsLines) {
@@ -160,7 +160,7 @@ public class AdminClient {
             try {
                 flightAdminService.registerFlight(flightsLine.get(0), flightsLine.get(1), flightsLine.get(2), tickets);
             } catch (RemoteException | DuplicateFlightCodeException | ModelNotFoundException exception) {
-                logger.error(exception.getMessage());
+                System.out.println(exception.getMessage());
             }
         }
 

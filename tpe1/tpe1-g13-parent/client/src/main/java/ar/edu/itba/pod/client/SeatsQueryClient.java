@@ -29,7 +29,7 @@ public class SeatsQueryClient {
         try {
             serverAddress = serverAddressParser(Optional.ofNullable(properties.getProperty("serverAddress")).orElseThrow(IllegalArgumentException::new));
         }catch (NumberFormatException e){
-            logger.error("Invalid port number");
+            System.out.println("Invalid port number");
             return;
         }
 
@@ -37,7 +37,7 @@ public class SeatsQueryClient {
         try{
             flightCode = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            logger.error("Missing action.");
+            System.out.println("Missing action.");
             return;
         }
 
@@ -45,15 +45,15 @@ public class SeatsQueryClient {
         try{
             category = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            logger.error("Missing action.");
+            System.out.println("Missing action.");
             return;
         }
 
-        final Integer rowNumber;
+        final int rowNumber;
         try{
             rowNumber = Integer.parseInt(Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new));
         }catch (IllegalArgumentException e){
-            logger.error("Missing action.");
+            System.out.println("Missing action.");
             return;
         }
 
@@ -61,7 +61,7 @@ public class SeatsQueryClient {
         try{
             outPath = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            logger.error("Missing action.");
+            System.out.println("Missing action.");
             return;
         }
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
@@ -79,7 +79,7 @@ public class SeatsQueryClient {
             try {
                 results = seatsQueryService.flightSeats(flightCode);
             }catch(RemoteException | FlightNotFoundException exception){
-                logger.error(exception.getMessage());
+                System.out.println(exception.getMessage());
             }
         } else if (category != null && rowNumber == null) {
 
@@ -87,22 +87,22 @@ public class SeatsQueryClient {
             try{
                 cat = Category.valueOf(category);
             }catch (IllegalArgumentException ex){
-                logger.error("Invalid category");
+                System.out.println("Invalid category");
             }
 
             try{
                 results = seatsQueryService.flightSeatsByCategory(flightCode, cat);
             }catch(RemoteException | FlightNotFoundException ex ){
-                logger.error(ex.getMessage());
+                System.out.println(ex.getMessage());
             }
         }else if (category == null){
             try{
                 results.add(seatsQueryService.flightSeatsByRow(flightCode, rowNumber));
             }catch(RemoteException | FlightNotFoundException ex){
-                logger.error(ex.getMessage());
+                System.out.println(ex.getMessage());
             }
         }else{
-            logger.error("Invalid amount if arguments.");
+            System.out.println("Invalid amount if arguments.");
             return;
         }
         exportToCSV(results, outPath);

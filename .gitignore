@@ -165,3 +165,19 @@ tpe1/tpe1-g13-parent/server/target/tpe1-g13-parent-server-1.0-SNAPSHOT/run-serve
 tpe1/tpe1-g13-parent/run-all.sh
 
 tpe1/tpe1-g13-parent/.idea/uiDesigner.xml
+
+tpe1/tpe1-g13-parent/client/target/classes/commands.txt
+
+tpe1/tpe1-g13-parent/client/.DS_Store
+
+tpe1/tpe1-g13-parent/client/src/.DS_Store
+
+tpe1/tpe1-g13-parent/client/src/main/.DS_Store
+
+tpe1/.DS_Store
+
+tpe1/tpe1-g13-parent/.DS_Store
+
+tpe1/tpe1-g13-parent/client/target/classes/modelos.csv
+
+tpe1/tpe1-g13-parent/client/target/classes/vuelos.csv
