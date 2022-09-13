@@ -77,7 +77,7 @@ public class SeatsManagerClient {
         }
 
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
-        final SeatService seatService = (SeatService) registry.lookup("SeatService");
+        final SeatService seatService = (SeatService) registry.lookup(SeatService.class.getName());
 
         runAction(seatService,action, flight, row, col, passenger, originalFlight);
     }
@@ -112,28 +112,28 @@ public class SeatsManagerClient {
         boolean status = false;
         try {
              status = seatService.status(flightCode, row, col, passenger);
+            System.out.printf("Seat %d%c is " + (status ? "FREE" : "OCCUPIED") + ".%n", row, col);
         } catch(SeatNotFoundException | FlightNotFoundException | RemoteException exception){
             System.out.println(exception.getMessage());
         }
-        System.out.printf("Seat %d%c is " + (status ? "FREE" : "OCCUPIED") + ".%n", row, col);
     }
 
     private static void assignSeat(SeatService seatService, String flightCode, int row, char col, String passenger) {
         try {
             seatService.assign(flightCode, row, col, passenger);
+            System.out.printf("Seat %d%c is assigned to %s", row, col, passenger);
         } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | PassengerWithSeatAlreadyAssignedException | InvalidSeatCategoryException | SeatNotEmptyException exception){
             System.out.println(exception.getMessage());
         }
-        System.out.printf("Seat %d%c is assigned to %s", row, col, passenger);
     }
 
     private static void movePassengerSeat(SeatService seatService, String flightCode, int row, char col, String passenger) {
         try {
             seatService.move(flightCode, passenger, row, col);
+            System.out.printf("Seat %d%c is assigned to %s", row, col, passenger);
         } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | PassengerWithSeatAlreadyAssignedException | InvalidSeatCategoryException | SeatNotEmptyException exception) {
             System.out.print("Exception");
         }
-        System.out.printf("Seat %d%c is assigned to %s", row, col, passenger);
     }
 
     private static void getAlternatives(SeatService seatService, String flightCode, String passenger) {
@@ -151,9 +151,9 @@ public class SeatsManagerClient {
     private static void changeTicket(SeatService seatService, String originalFlightCode, String alternativeFlightCode, String passenger) {
         try {
             seatService.changeTicket(originalFlightCode, alternativeFlightCode, passenger);
+            System.out.printf("Your ticket changed to Flight %s from Flight %s.%n.",alternativeFlightCode,originalFlightCode);
         } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | FlightAlreadyConfirmedException exception) {
             System.out.println(exception.getMessage());
         }
-        System.out.printf("Your ticket changed to Flight %s from Flight %s.%n.",alternativeFlightCode,originalFlightCode);
     }
 }

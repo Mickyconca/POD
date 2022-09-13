@@ -168,6 +168,7 @@ public class Servant implements FlightService {
             if (seat.isEmpty() && flight.getStatus() == FlightStatus.PENDING) {
                 if (passengerInfo.getCategory().getCategoryId() >= seat.getCategory().getCategoryId()) {
                     passengerInfo.setSeat(seat);
+                    seat.setEmpty(false);
                     seatAssignedNotification(flight, passengerInfo);
                     return;
                 }
