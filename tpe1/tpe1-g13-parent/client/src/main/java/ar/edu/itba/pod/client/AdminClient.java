@@ -1,10 +1,8 @@
 package ar.edu.itba.pod.client;
 
-import ar.edu.itba.pod.exceptions.DuplicateFlightCodeException;
-import ar.edu.itba.pod.exceptions.DuplicateModelException;
-import ar.edu.itba.pod.exceptions.InvalidModelException;
-import ar.edu.itba.pod.exceptions.ModelNotFoundException;
+import ar.edu.itba.pod.exceptions.*;
 import ar.edu.itba.pod.flight.Category;
+import ar.edu.itba.pod.flight.FlightStatus;
 import ar.edu.itba.pod.services.FlightAdminService;
 
 import java.io.IOException;
@@ -46,43 +44,60 @@ public class AdminClient {
             return;
         }
 
-        final String inPath;
-        try{
-            inPath=Optional.ofNullable(properties.getProperty("inPath"))
-                    .orElseThrow(IllegalArgumentException::new);
-        }catch (IllegalArgumentException ex){
-            System.out.println("Missing input file");
-            System.out.println("Missing input file");
-            return;
-        }
+        final String inPath = properties.getProperty("inPath");
+        final String flight = properties.getProperty("flight");
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
         FlightAdminService flightAdminService = (FlightAdminService) registry.lookup(FlightAdminService.class.getName());
-        runAction(flightAdminService,action, inPath);
+        runAction(flightAdminService,action, inPath, flight);
 
 
     }
 
-    private static void runAction(FlightAdminService flightAdminService, String action, String inPath){
+    private static void runAction(FlightAdminService flightAdminService, String action, String inPath, String flight){
         //todo check if path is null or action is null depending on action
 
         switch (action) {
             case "models":
-                addPlaneModels(flightAdminService, inPath);
+                if(inPath != null){
+                    addPlaneModels(flightAdminService, inPath);
+                }else{
+                    System.out.println("Missing path.");
+                }
                 break;
             case "flights":
-                addFlight(flightAdminService, inPath);
+                if(inPath != null){
+                    addFlight(flightAdminService, inPath);
+                }else{
+                    System.out.println("Missing path.");
+                }
                 break;
             case "status":
-                //status fn
+                if(flight != null){
+                    flightStatus(flightAdminService, flight);
+                }else{
+                    System.out.println("Missing flight code.");
+                }
                 break;
             case "confirm":
-                //confirm fn
+                if(flight != null){
+                    confirmFlight(flightAdminService, flight);
+                }else{
+                    System.out.println("Missing flight code.");
+                }
                 break;
             case "cancel":
-                //cancel fn
+                if (flight != null){
+                    cancelFlight(flightAdminService, flight);
+                }else{
+                    System.out.println("Missing flight code.");
+                }
                 break;
             case "reticketing":
-                //reticketing fn
+                if (flight != null){
+                    reticketing(flightAdminService, flight);
+                }else{
+                    System.out.println("Missing flight code.");
+                }
                 break;
             default:
                 System.out.println("Invalid action");
@@ -95,6 +110,7 @@ public class AdminClient {
 //        Boeing 787;BUSINESS#2#3,PREMIUM_ECONOMY#3#3,ECONOMY#20#10
 //        Airbus A321;ECONOMY#15#9,PREMIUM_ECONOMY#3#6
         List<List<String>> planeModelsLines = new LinkedList<>();
+        int modelsAdded = 0;
         try{
             planeModelsLines = Files.readAllLines(Paths.get(inPath)).stream().skip(1)
                     .map(line->Arrays.asList(line.split(";")))
@@ -130,10 +146,14 @@ public class AdminClient {
             }
             try {
                 flightAdminService.registerPlaneModel(line.get(0),businessSeats, premiumSeats, economySeats);
-            } catch (RemoteException | DuplicateModelException | InvalidModelException exception) {
+                modelsAdded++;
+            } catch (RemoteException exception) {
                 System.out.println(exception.getMessage());
+            }catch(DuplicateModelException | InvalidModelException exception){
+                System.out.println("Cannot add model " + line.get(0) + ".");
             }
         }
+        System.out.println(modelsAdded + " models added.");
 
     }
 
@@ -149,17 +169,62 @@ public class AdminClient {
         }catch(IOException e) {
             System.out.printf("Error parsing file %s\n", inPath);
         }
-
+        int flightsAdded = 0;
         for (List<String> flightsLine : flightsLines) {
             Map<Category, Set<String>> tickets = parseTickets(flightsLine.get(3));
             // TODO fix catch
             try {
                 flightAdminService.registerFlight(flightsLine.get(0), flightsLine.get(1), flightsLine.get(2), tickets);
-            } catch (RemoteException | DuplicateFlightCodeException | ModelNotFoundException exception) {
+                flightsAdded++;
+            } catch (RemoteException exception) {
                 System.out.println(exception.getMessage());
+            } catch(DuplicateFlightCodeException | ModelNotFoundException exception){
+                System.out.println("Cannot add flight " + flightsLine.get(0));
             }
         }
 
+        System.out.println(flightsAdded + " flights added.");
+    }
+
+    private static void flightStatus(FlightAdminService flightAdminService, String flight){
+        try{
+            FlightStatus status = flightAdminService.flightStatus(flight);
+            System.out.println("Flight " + flight + " is " + status.getStatus());
+        }catch (RemoteException | FlightNotFoundException exception){
+            System.out.println(exception.getMessage());
+        }
+    }
+
+    private static void confirmFlight(FlightAdminService flightAdminService, String flight){
+        try{
+            flightAdminService.confirmFlight(flight);
+            flightStatus(flightAdminService,flight);
+        }catch (RemoteException | FlightNotFoundException exception){
+            System.out.println(exception.getMessage());
+        }
+    }
+
+    private static void cancelFlight(FlightAdminService flightAdminService, String flight){
+        try {
+            flightAdminService.cancelFlight(flight);
+            flightStatus(flightAdminService, flight);
+        }catch(RemoteException | FlightNotFoundException ex){
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private static void reticketing(FlightAdminService flightAdminService, String flight){
+        try{
+            List<String> ticketsChanged = flightAdminService.changeFlightTickets(flight);
+            System.out.println(ticketsChanged.get(0) + " tickets where changed.");
+            if(ticketsChanged.size()>1){
+                for (String s : ticketsChanged.subList(1, ticketsChanged.size())){
+                    System.out.println(s);
+                }
+            }
+        }catch (RemoteException | FlightNotFoundException e ){
+            System.out.println(e.getMessage());
+        }
     }
 
     static private Map<Category, Set<String>> parseTickets(String passLine){

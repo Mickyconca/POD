@@ -38,21 +38,9 @@ public class SeatsQueryClient {
             return;
         }
 
-        final String category;
-        try{
-            category = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
-        }catch (IllegalArgumentException e){
-            System.out.println("Missing action.");
-            return;
-        }
+        final String category = properties.getProperty("action");
 
-        final int rowNumber;
-        try{
-            rowNumber = Integer.parseInt(Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new));
-        }catch (IllegalArgumentException e){
-            System.out.println("Missing action.");
-            return;
-        }
+        final int rowNumber = Integer.parseInt(properties.getProperty("action"));
 
         final String outPath;
         try{
@@ -61,11 +49,10 @@ public class SeatsQueryClient {
             System.out.println("Missing action.");
             return;
         }
+
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
         SeatsQueryService seatsQueryService =  (SeatsQueryService) registry.lookup("SeatsQueryService");
         runAction(seatsQueryService, flightCode, category, rowNumber, outPath);
-
-
 
     }
 

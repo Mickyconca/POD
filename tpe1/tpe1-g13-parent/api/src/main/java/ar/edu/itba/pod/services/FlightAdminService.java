@@ -2,8 +2,10 @@ package ar.edu.itba.pod.services;
 
 import ar.edu.itba.pod.flight.Category;
 import ar.edu.itba.pod.flight.FlightStatus;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,5 +16,5 @@ public interface FlightAdminService extends Remote {
     FlightStatus flightStatus(String flightCode) throws RemoteException;
     void confirmFlight(String flightCode) throws RemoteException;
     void cancelFlight(String flightCode) throws RemoteException;
-    void changeFlightTickets(String flightCode) throws RemoteException;
+    List<String> changeFlightTickets(String flightCode) throws RemoteException;
 }

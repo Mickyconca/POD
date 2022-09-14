@@ -95,18 +95,27 @@ public class Servant implements FlightService {
     }
 
     @Override
-    public void changeFlightTickets(String flightCode) throws RemoteException {
+    public List<String> changeFlightTickets(String flightCode) throws RemoteException {
         Flight flight = getFlightByCode(flightCode);
         List<Passenger> sortedPassengers = flight.getPassengers().values().stream().sorted(Comparator.comparing(Passenger::getName)).collect(Collectors.toList());
+        int added = 0;
+        List<String> notAdded = new LinkedList<>();
         for (Passenger p : sortedPassengers) {
-            changeTicket(flight, p);
+            if(changeTicket(flight, p)){
+                added++;
+            }else{
+                notAdded.add("Cannot find alternative flight for " + p.getName() + " with Ticket " + flightCode);
+            }
+
         }
+        notAdded.add(0,String.valueOf(added));
+        return notAdded;
     }
 
-    private void changeTicket(Flight originalFlight, Passenger passenger) throws RemoteException {
-        List<AlternativeFlight> alternativeFlights = getAlternatives(originalFlight.getDestination(), passenger);
+    private boolean changeTicket(Flight originalFlight, Passenger passenger) throws RemoteException {
+        List<AlternativeFlight> alternativeFlights = getAlternatives(originalFlight.getFlightCode(), originalFlight.getDestination(), passenger);
         if (alternativeFlights.isEmpty()) {
-            throw new NoAlternativesException();
+            return false;
         }
         //find best alternative
         AlternativeFlight alternativeFlight = alternativeFlights.get(0);
@@ -124,12 +133,14 @@ public class Servant implements FlightService {
             }
         }
 
+
         if (passenger.hasSeatAssigned()) {
             passenger.getSeat().setEmpty(true);
             passenger.setSeat(null);
         }
         originalFlight.removePassenger(passenger);
         alternativeFlight.getFlight().addPassenger(passenger);
+        return true;
     }
 
     private void handleStatusChangeNotifications(final Flight flight) {
@@ -218,7 +229,7 @@ public class Servant implements FlightService {
     public List<String> alternatives(String flightCode, String passenger) throws RemoteException {
         Flight f = getFlightByCode(flightCode);
         Passenger p = f.getPassenger(passenger);
-        List<AlternativeFlight> alternativeFlights = getAlternatives(f.getDestination(), p);
+        List<AlternativeFlight> alternativeFlights = getAlternatives(flightCode, f.getDestination(), p);
         return alternativeFlights.stream().map(AlternativeFlight::toString).collect(Collectors.toList());
     }
 
@@ -229,7 +240,7 @@ public class Servant implements FlightService {
 
         if (oldFlight.getStatus() != FlightStatus.CONFIRMED) {
 
-            List<AlternativeFlight> alternativeFlights = getAlternatives(oldFlight.getDestination(), p);
+            List<AlternativeFlight> alternativeFlights = getAlternatives(originalFlightCode, oldFlight.getDestination(), p);
             Optional<AlternativeFlight> alternativeFlight = alternativeFlights.stream().filter((AlternativeFlight af) -> af.getFlight().getFlightCode().equals(alternativeFlightCode)).findFirst();
             if (alternativeFlight.isPresent()) {
                 if (p.hasSeatAssigned()) {
@@ -360,10 +371,10 @@ public class Servant implements FlightService {
         return flight;
     }
 
-    private List<AlternativeFlight> getAlternatives(String destination, Passenger passenger) {
+    private List<AlternativeFlight> getAlternatives(String flightCode, String destination, Passenger passenger) {
         List<AlternativeFlight> alternatives = new LinkedList<>();
         for (Flight flight : flights.values()) {
-            if (flight.getDestination().equals(destination) && flight.getStatus() == FlightStatus.PENDING) {
+            if (!flight.getFlightCode().equals(flightCode) && flight.getDestination().equals(destination) && flight.getStatus() == FlightStatus.PENDING) {
                 for (int cat = passenger.getCategory().getCategoryId(); cat < Category.values().length; cat++) {
                     int capacity = flight.getCategoryCapacity(Category.getCategoryById(cat));
                     if (capacity > 0) {

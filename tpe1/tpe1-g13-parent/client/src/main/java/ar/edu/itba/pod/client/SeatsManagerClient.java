@@ -41,37 +41,10 @@ public class SeatsManagerClient {
             return;
         }
 
-        final String passenger;
-        try{
-            passenger = Optional.ofNullable(properties.getProperty("passenger")).orElseThrow(IllegalArgumentException::new);
-        }catch (IllegalArgumentException e){
-            System.out.println("Missing passenger.");
-            return;
-        }
-
-        final int row;
-        try{
-            row = Integer.parseInt(Optional.ofNullable(properties.getProperty("row")).orElseThrow(IllegalArgumentException::new));
-        }catch (IllegalArgumentException e){
-            System.out.println("Missing row.");
-            return;
-        }
-
-        final char col;
-        try{
-            col = Optional.ofNullable(properties.getProperty("col")).orElseThrow(IllegalArgumentException::new).toCharArray()[0];
-        }catch (IllegalArgumentException e){
-            System.out.println("Missing col.");
-            return;
-        }
-
-        final String originalFlight;
-        try{
-            originalFlight = Optional.ofNullable(properties.getProperty("originalFlight")).orElseThrow(IllegalArgumentException::new);
-        }catch (IllegalArgumentException e){
-            System.out.println("Missing originalFlight.");
-            return;
-        }
+        final String passenger = properties.getProperty("passenger");
+        final Integer row = Integer.parseInt(properties.getProperty("row"));
+        final Character col = properties.getProperty("col").charAt(0);
+        final String originalFlight = properties.getProperty("originalFlight");
 
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
         final SeatService seatService = (SeatService) registry.lookup(SeatService.class.getName());
@@ -79,24 +52,92 @@ public class SeatsManagerClient {
         runAction(seatService,action, flight, row, col, passenger, originalFlight);
     }
 
-    private static void runAction(SeatService seatService, String action, String flight, int row, char col, String passenger, String originalFlight){
+    private static void runAction(SeatService seatService, String action, String flight, Integer row, Character col, String passenger, String originalFlight){
         if(flight == null || action == null) {
            throw new IllegalArgumentException();
         }
         switch (action) {
             case "status":
+                if(col == null){
+                    System.out.println("Invalid column arguments");
+                    break;
+                }
+                if(Character.isLetter(col)){
+                    System.out.println("Invalid column arguments");
+                    break;
+                }
+                if (row == null){
+                    System.out.println("Invalid row argument.");
+                    break;
+                }
+                if(row < 0 || row > 25){
+                    System.out.println("Invalid row argument.");
+                    break;
+                }
                 getSeatStatus(seatService, flight, row, col, passenger);
                 break;
             case "assign":
+                if(col == null){
+                    System.out.println("Missing column arguments");
+                    break;
+                }
+                if(Character.isLetter(col)){
+                    System.out.println("Invalid column arguments");
+                    break;
+                }
+                if (row == null){
+                    System.out.println("Missing row argument.");
+                    break;
+                }
+                if(row < 0 || row > 25){
+                    System.out.println("Invalid row argument.");
+                    break;
+                }
+                if(passenger == null){
+                    System.out.println("Missing passenger name.");
+                    break;
+                }
                 assignSeat(seatService, flight, row, col, passenger);
                 break;
             case "move":
+                if(col == null){
+                    System.out.println("Missing column argument.");
+                    break;
+                }
+                if(Character.isLetter(col)){
+                    System.out.println("Invalid column argument.");
+                    break;
+                }
+                if (row == null){
+                    System.out.println("Missing row argument.");
+                    break;
+                }
+                if(row < 0 || row > 25){
+                    System.out.println("Invalid row argument.");
+                    break;
+                }
+                if(passenger == null){
+                    System.out.println("Missing passenger name.");
+                    break;
+                }
                 movePassengerSeat(seatService, flight, row, col, passenger);
                 break;
             case "alternatives":
-                getAlternatives(seatService, flight, passenger);
+                if(passenger == null){
+                    System.out.println("Missing passenger name.");
+                    break;
+                }else{
+                    getAlternatives(seatService, flight, passenger);
+                }
                 break;
             case "changeTicket":
+                if(passenger == null){
+                    System.out.println("Missing passenger name.");
+                    break;
+                }
+                if(originalFlight == null){
+                    System.out.println("Missing original flight code argument.");
+                }
                 changeTicket(seatService, originalFlight, flight, passenger);
                 break;
             default:
@@ -106,7 +147,7 @@ public class SeatsManagerClient {
     }
 
     private static void getSeatStatus(SeatService seatService, String flightCode, int row, char col, String passenger) {
-        boolean status = false;
+        boolean status;
         try {
              status = seatService.status(flightCode, row, col, passenger);
             System.out.printf("Seat %d%c is " + (status ? "FREE" : "OCCUPIED") + ".%n", row, col);
