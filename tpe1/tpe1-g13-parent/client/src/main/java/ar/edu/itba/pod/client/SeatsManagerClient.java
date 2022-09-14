@@ -59,10 +59,11 @@ public class SeatsManagerClient {
         switch (action) {
             case "status":
                 if(col == null){
+                    System.out.println("Col es null");
                     System.out.println("Invalid column arguments");
                     break;
                 }
-                if(Character.isLetter(col)){
+                if(!Character.isLetter(col)){
                     System.out.println("Invalid column arguments");
                     break;
                 }
@@ -81,7 +82,7 @@ public class SeatsManagerClient {
                     System.out.println("Missing column arguments");
                     break;
                 }
-                if(Character.isLetter(col)){
+                if(!Character.isLetter(col)){
                     System.out.println("Invalid column arguments");
                     break;
                 }
@@ -104,7 +105,7 @@ public class SeatsManagerClient {
                     System.out.println("Missing column argument.");
                     break;
                 }
-                if(Character.isLetter(col)){
+                if(!Character.isLetter(col)){
                     System.out.println("Invalid column argument.");
                     break;
                 }
