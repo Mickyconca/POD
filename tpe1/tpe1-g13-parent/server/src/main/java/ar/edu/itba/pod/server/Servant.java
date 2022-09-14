@@ -8,6 +8,8 @@ import ar.edu.itba.pod.services.*;
 
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class Servant implements FlightService {
@@ -15,8 +17,14 @@ public class Servant implements FlightService {
     private final Map<String, Flight> flights = new HashMap<>();
     private final Map<String, Map<String, List<NotificationsServiceClient>>> passengersNotifications = new HashMap<>(); //Map<passengerName,<flightCode,handler>>
 
+    private final ExecutorService executor;
+
     private final Object planeModelsLock = new Object();
     private final Object flightsLock = new Object();
+
+    public Servant() {
+        this.executor = Executors.newCachedThreadPool();
+    }
 
     @Override
     public void registerPlaneModel(String name, int[] businessSeats, int[] premiumSeats, int[] economySeats) throws DuplicateModelException, RemoteException {
@@ -70,6 +78,7 @@ public class Servant implements FlightService {
                 throw new FlightNotFoundException();
             }
             flights.get(flightCode).setStatus(FlightStatus.CONFIRMED);
+
             handleStatusChangeNotifications(flights.get(flightCode));
         }
     }
@@ -130,10 +139,15 @@ public class Servant implements FlightService {
         for (String p : passengersWithNotifications) {
             passenger = flight.getPassenger(p);
             for (NotificationsServiceClient handler : passengersNotifications.get(p).get(flight.getFlightCode())) {
-                if (passenger.hasSeatAssigned()) {
-                    handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter());
+                Passenger finalPassenger = passenger;
+                if (finalPassenger.hasSeatAssigned()) {
+                    executor.execute(() -> {
+                        handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), finalPassenger.getSeat().getCategory().getCategory(), finalPassenger.getSeat().getRowNumber(), finalPassenger.getSeat().getColLetter());
+                    });
                 } else {
-                    handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), passenger.getCategory().getCategory(), null, null);
+                    executor.execute(() -> {
+                        handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), finalPassenger.getCategory().getCategory(), null, null);
+                    });
                 }
                 if (flight.getStatus() == FlightStatus.CONFIRMED) {
                     passengersNotifications.get(p).remove(flight.getFlightCode());
@@ -281,7 +295,9 @@ public class Servant implements FlightService {
             passengersNotifications.putIfAbsent(passengerName, new HashMap<>());
             passengersNotifications.get(passengerName).putIfAbsent(flightCode, new LinkedList<>());
             passengersNotifications.get(passengerName).get(flightCode).add(handler);
-            handler.onPassengerRegistered(flightCode, flight.getDestination());
+            executor.execute(() -> {
+                handler.onPassengerRegistered(flightCode, flight.getDestination());
+            });
         }else{
             throw new FlightAlreadyConfirmedException();
         }
@@ -305,7 +321,9 @@ public class Servant implements FlightService {
     private void seatAssignedNotification(Flight flight, Passenger passenger) {
         if (passengersNotifications.containsKey(passenger.getName()) && passengersNotifications.get(passenger.getName()).containsKey(flight.getFlightCode())) {
             for (NotificationsServiceClient handler : passengersNotifications.get(passenger.getName()).get(flight.getFlightCode())) {
-                handler.onSeatAssigned(passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
+                executor.execute(() -> {
+                    handler.onSeatAssigned(passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
+                });
             }
         }
     }
@@ -313,7 +331,9 @@ public class Servant implements FlightService {
     private void seatMovedNotification(Flight flight, Passenger passenger, Seat oldSeat) {
         if (passengersNotifications.containsKey(passenger.getName()) && passengersNotifications.get(passenger.getName()).containsKey(flight.getFlightCode())) {
             for (NotificationsServiceClient handler : passengersNotifications.get(passenger.getName()).get(flight.getFlightCode())) {
-                handler.onSeatChanged(oldSeat.getCategory().getCategory(), oldSeat.getRowNumber(), oldSeat.getColLetter(), passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
+                executor.execute(() -> {
+                    handler.onSeatChanged(oldSeat.getCategory().getCategory(), oldSeat.getRowNumber(), oldSeat.getColLetter(), passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
+                });
             }
         }
     }
@@ -324,10 +344,11 @@ public class Servant implements FlightService {
                 passengersNotifications.get(passenger.getName()).remove(oldFlight.getFlightCode());
                 passengersNotifications.get(passenger.getName()).putIfAbsent(newFlight.getFlightCode(), new LinkedList<>());
                 passengersNotifications.get(passenger.getName()).get(newFlight.getFlightCode()).add(handler);
-                handler.onTicketChange(oldFlight.getFlightCode(), oldFlight.getDestination(), newFlight.getFlightCode(), newFlight.getDestination());
+                executor.execute(() -> {
+                    handler.onTicketChange(oldFlight.getFlightCode(), oldFlight.getDestination(), newFlight.getFlightCode(), newFlight.getDestination());
+                });
             }
         }
-
     }
 
 
