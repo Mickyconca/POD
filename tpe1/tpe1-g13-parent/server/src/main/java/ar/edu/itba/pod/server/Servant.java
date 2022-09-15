@@ -260,7 +260,6 @@ public class Servant implements FlightService {
     public List<List<String>> flightSeats(String flightCode) throws RemoteException {
         Flight flight = getFlightByCode(flightCode);
         List<List<String>> results = new LinkedList<>();
-        System.out.println("rows " + flight.getSeats().entrySet().size());
         for(Map.Entry<Integer, Map<Character, Seat>> rows : flight.getSeats().entrySet()){
             results.add(new LinkedList<>());
             for(Seat seat : rows.getValue().values()){
