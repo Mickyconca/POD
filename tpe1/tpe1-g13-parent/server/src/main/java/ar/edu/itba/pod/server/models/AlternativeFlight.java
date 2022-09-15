@@ -21,7 +21,7 @@ public class AlternativeFlight implements Comparable<AlternativeFlight> {
             if(capacity == o.capacity){
                 return flight.getFlightCode().compareTo(o.flight.getFlightCode());
             }else if(capacity > o.capacity){
-                return 1;
+                return -1;
             }
             return -1;
         }
