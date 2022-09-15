@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -43,9 +44,10 @@ public class NotificationsClient{
         }
 
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
-        NotificationsServiceClient notificationsHandler = new NotificationsHandler();
-        NotificationsServiceServer notificationsService = (NotificationsServiceServer) registry.lookup("NotificationsServiceServer");
-        notificationsService.registerPassengerForNotifications(passenger, flight, notificationsHandler);
+        NotificationsServiceClient notificationsHandlerClient = new NotificationsHandler();
+        UnicastRemoteObject.exportObject(notificationsHandlerClient,0);
+        NotificationsServiceServer notificationsService = (NotificationsServiceServer) registry.lookup(NotificationsServiceServer.class.getName());
+        notificationsService.registerPassengerForNotifications(passenger, flight, notificationsHandlerClient);
 
     }
 

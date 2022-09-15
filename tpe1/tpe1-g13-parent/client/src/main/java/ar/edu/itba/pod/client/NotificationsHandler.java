@@ -2,6 +2,7 @@ package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.services.NotificationsServiceClient;
 
+
 public class NotificationsHandler implements NotificationsServiceClient {
     @Override
     public void onPassengerRegistered(String flightCode, String destination) {

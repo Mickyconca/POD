@@ -97,16 +97,21 @@ public class Flight {
     private void generateSeats() {
         int row=1;
         for (Category c : Category.values()) {
-            for (int[] seatNumbers : planeModel.categories) {
+                int[] seatNumbers = planeModel.categories.get(c.getCategoryId());
+                System.out.println(flightCode + " rows:" + seatNumbers[0]);
+                System.out.println(flightCode + "seatNum[1]:" + seatNumbers[1]);
                 for (int i = 1; i <= seatNumbers[0]; i++) {
                     seats.put(row,new HashMap<>());
                     for (int j = 0; j < seatNumbers[1]; j++) {
                         seats.get(row).put((char) ('A'+j), new Seat(row, (char) ('A' + j), c));
                     }
                     row++;
-                }
+
             }
         }
+
+//        for(Category )
+
 
     }
 
