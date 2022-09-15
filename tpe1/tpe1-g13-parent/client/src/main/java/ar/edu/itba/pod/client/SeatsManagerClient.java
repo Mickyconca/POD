@@ -42,8 +42,14 @@ public class SeatsManagerClient {
         }
 
         final String passenger = properties.getProperty("passenger");
-        final Integer row = Integer.parseInt(properties.getProperty("row"));
-        final Character col = properties.getProperty("col").charAt(0);
+        final String rowStr = properties.getProperty("row");
+        Integer row = null;
+        if(rowStr != null)
+            row = Integer.parseInt(properties.getProperty("row"));
+        Character col = null;
+        if(properties.getProperty("col") != null){
+             col = properties.getProperty("col").charAt(0);
+        }
         final String originalFlight = properties.getProperty("originalFlight");
 
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
@@ -62,7 +68,7 @@ public class SeatsManagerClient {
                     System.out.println("Invalid column arguments");
                     break;
                 }
-                if(Character.isLetter(col)){
+                if(!Character.isLetter(col)){
                     System.out.println("Invalid column arguments");
                     break;
                 }
@@ -81,7 +87,7 @@ public class SeatsManagerClient {
                     System.out.println("Missing column arguments");
                     break;
                 }
-                if(Character.isLetter(col)){
+                if(!Character.isLetter(col)){
                     System.out.println("Invalid column arguments");
                     break;
                 }
@@ -104,7 +110,7 @@ public class SeatsManagerClient {
                     System.out.println("Missing column argument.");
                     break;
                 }
-                if(Character.isLetter(col)){
+                if(!Character.isLetter(col)){
                     System.out.println("Invalid column argument.");
                     break;
                 }
@@ -180,7 +186,10 @@ public class SeatsManagerClient {
            alternatives = seatService.alternatives(flightCode, passenger);
         } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException exception) {
             System.out.print("Exception");
+        } catch (NoAlternativesException e){
+            System.out.println(e.getMessage());
         }
+
         for(String alternative: alternatives){
             System.out.println(alternative);
         }

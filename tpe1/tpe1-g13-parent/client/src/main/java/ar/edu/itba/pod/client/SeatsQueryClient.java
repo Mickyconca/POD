@@ -32,26 +32,29 @@ public class SeatsQueryClient {
 
         final String flightCode;
         try{
-            flightCode = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
+            flightCode = Optional.ofNullable(properties.getProperty("flight")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            System.out.println("Missing action.");
+            System.out.println("Missing flight.");
             return;
         }
 
-        final String category = properties.getProperty("action");
+        final String category = properties.getProperty("category");
 
-        final int rowNumber = Integer.parseInt(properties.getProperty("action"));
-
+        final String rowStr = properties.getProperty("row");
+        Integer rowNumber = null;
+        if(rowStr != null){
+            rowNumber = Integer.parseInt(properties.getProperty("row"));
+        }
         final String outPath;
         try{
-            outPath = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
+            outPath = Optional.ofNullable(properties.getProperty("outPath")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            System.out.println("Missing action.");
+            System.out.println("Missing outPath.");
             return;
         }
 
         final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
-        SeatsQueryService seatsQueryService =  (SeatsQueryService) registry.lookup("SeatsQueryService");
+        SeatsQueryService seatsQueryService =  (SeatsQueryService) registry.lookup(SeatsQueryService.class.getName());
         runAction(seatsQueryService, flightCode, category, rowNumber, outPath);
 
     }
@@ -86,7 +89,7 @@ public class SeatsQueryClient {
                 System.out.println(ex.getMessage());
             }
         }else{
-            System.out.println("Invalid amount if arguments.");
+            System.out.println("Invalid amount of arguments.");
             return;
         }
         exportToCSV(results, outPath);

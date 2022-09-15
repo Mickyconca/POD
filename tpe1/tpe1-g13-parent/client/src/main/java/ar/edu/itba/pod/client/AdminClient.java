@@ -179,7 +179,7 @@ public class AdminClient {
             } catch (RemoteException exception) {
                 System.out.println(exception.getMessage());
             } catch(DuplicateFlightCodeException | ModelNotFoundException exception){
-                System.out.println("Cannot add flight " + flightsLine.get(0));
+                System.out.println("Cannot add flight " + flightsLine.get(1));
             }
         }
 

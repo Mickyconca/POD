@@ -10,7 +10,7 @@ public class AlternativeFlight implements Comparable<AlternativeFlight> {
     public AlternativeFlight(Flight flight, Category category, int capacity) {
         this.flight = flight;
         this.category = category;
-        this.capacity = capacity;
+        this.capacity = flight.getCategoryCapacity(category);
     }
 
     @Override
@@ -38,6 +38,6 @@ public class AlternativeFlight implements Comparable<AlternativeFlight> {
 
     @Override
     public String toString() {
-        return flight.getDestination() + "\t|\t" + flight.getFlightCode() + "\t|\t" + category + " " + category.getCategory();
+        return flight.getDestination() + "\t|\t" + flight.getFlightCode() + "\t|\t" + capacity + " " + category.getCategory();
     }
 }

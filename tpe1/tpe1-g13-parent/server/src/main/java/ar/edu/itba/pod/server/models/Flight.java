@@ -95,24 +95,32 @@ public class Flight {
     }
 
     private void generateSeats() {
+        int row=1;
         for (Category c : Category.values()) {
             for (int[] seatNumbers : planeModel.categories) {
                 for (int i = 1; i <= seatNumbers[0]; i++) {
-                    seats.put(i,new HashMap<>());
+                    seats.put(row,new HashMap<>());
                     for (int j = 0; j < seatNumbers[1]; j++) {
-                        seats.get(i).put((char) ('A'+j),  new Seat(i, (char) ('A' + j), c) );
+                        seats.get(row).put((char) ('A'+j), new Seat(row, (char) ('A' + j), c));
                     }
+                    row++;
                 }
             }
         }
+
     }
 
     public int getCategoryCapacity(Category category) {
         int capacity = 0;
         for (Map<Character, Seat> columns : seats.values()) {
-            if(!columns.isEmpty() && columns.get('A').getCategory() == category){ //if it's not empty, first letter is A
-                capacity+=columns.size(); //all columns belong to the same category
+            for(Seat s: columns.values()){
+                if(s.getCategory() == category && s.isEmpty()){
+                    capacity++;
+                }
             }
+//            if(!columns.isEmpty() && columns.get('A').getCategory() == category){ //if it's not empty, first letter is A
+//                capacity+=columns.size(); //all columns belong to the same category
+//            }
         }
         return capacity;
     }

@@ -260,13 +260,14 @@ public class Servant implements FlightService {
     public List<List<String>> flightSeats(String flightCode) throws RemoteException {
         Flight flight = getFlightByCode(flightCode);
         List<List<String>> results = new LinkedList<>();
+        System.out.println("rows " + flight.getSeats().entrySet().size());
         for(Map.Entry<Integer, Map<Character, Seat>> rows : flight.getSeats().entrySet()){
             results.add(new LinkedList<>());
             for(Seat seat : rows.getValue().values()){
-                results.get(rows.getKey()).add(seatInfoToString(flight, seat));
+                results.get(rows.getKey()-1).add(seatInfoToString(flight, seat));
             }
             Category rowCategory = rows.getValue().get('A').getCategory();
-            results.get(rows.getKey()).add(rowCategory.getCategory());
+            results.get(rows.getKey()-1).add(rowCategory.getCategory());
         }
         return results;
     }
@@ -366,6 +367,7 @@ public class Servant implements FlightService {
     private Flight getFlightByCode(String flightCode) {
         Flight flight = flights.get(flightCode);
         if (flight == null) {
+
             throw new FlightNotFoundException();
         }
         return flight;
@@ -383,7 +385,11 @@ public class Servant implements FlightService {
                 }
             }
         }
+        if(alternatives.isEmpty()){
+            throw new NoAlternativesException(flightCode, passenger.getName());
+        }
         Collections.sort(alternatives);
+
         return alternatives;
     }
 
