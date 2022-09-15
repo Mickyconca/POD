@@ -176,7 +176,7 @@ public class Servant implements FlightService {
                 }
                 if (flight.getStatus() == FlightStatus.CONFIRMED) {
                     passengersNotifications.get(p).remove(flight.getFlightCode());
-                    if (passengersNotifications.get(p).isEmpty()) { //todo check if this is ok
+                    if (passengersNotifications.get(p).isEmpty()) {
                         passengersNotifications.remove(p);
                     }
                 }
@@ -342,9 +342,9 @@ public class Servant implements FlightService {
     @Override
     public void registerPassengerForNotifications(String passengerName, String flightCode, NotificationsServiceClient handler) {
         synchronized (flightsLock) {
-            Flight flight = getFlightByCode(flightCode); //throws exception if doesnt exist
+            Flight flight = getFlightByCode(flightCode);
             if (flight.getStatus() != FlightStatus.CONFIRMED) {
-                flight.getPassenger(passengerName); //throws exc if passenger not in flight
+                flight.getPassenger(passengerName);
                 passengersNotifications.putIfAbsent(passengerName, new HashMap<>());
                 passengersNotifications.get(passengerName).putIfAbsent(flightCode, new LinkedList<>());
                 passengersNotifications.get(passengerName).get(flightCode).add(handler);

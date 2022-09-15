@@ -4,7 +4,6 @@ import ar.edu.itba.pod.exceptions.*;
 import ar.edu.itba.pod.flight.Category;
 import ar.edu.itba.pod.flight.FlightStatus;
 import ar.edu.itba.pod.services.FlightAdminService;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -25,12 +24,12 @@ public class AdminClient {
     public static void main(String[] args) throws IOException, NotBoundException{
         System.out.println("Flight Admin Client starting..");
         final Properties properties = System.getProperties();
+
         //get server address & port
         final Utils.ServerAddress serverAddress;
         try {
             serverAddress = serverAddressParser(Optional.ofNullable(properties.getProperty("serverAddress")).orElseThrow(IllegalArgumentException::new));
         }catch (NumberFormatException e){
-            System.out.println("Invalid port number");
             System.out.println("Invalid port number");
             return;
         }
@@ -39,7 +38,6 @@ public class AdminClient {
         try{
             action = Optional.ofNullable(properties.getProperty("action")).orElseThrow(IllegalArgumentException::new);
         }catch (IllegalArgumentException e){
-            System.out.println("Missing action.");
             System.out.println("Missing action.");
             return;
         }
@@ -54,8 +52,6 @@ public class AdminClient {
     }
 
     private static void runAction(FlightAdminService flightAdminService, String action, String inPath, String flight){
-        //todo check if path is null or action is null depending on action
-
         switch (action) {
             case "models":
                 if(inPath != null){
@@ -105,10 +101,10 @@ public class AdminClient {
         }
     }
 
+    //        Model;Seats
+    //        Boeing 787;BUSINESS#2#3,PREMIUM_ECONOMY#3#3,ECONOMY#20#10
+    //        Airbus A321;ECONOMY#15#9,PREMIUM_ECONOMY#3#6
     private static void addPlaneModels(FlightAdminService flightAdminService, String inPath){
-//        Model;Seats
-//        Boeing 787;BUSINESS#2#3,PREMIUM_ECONOMY#3#3,ECONOMY#20#10
-//        Airbus A321;ECONOMY#15#9,PREMIUM_ECONOMY#3#6
         List<List<String>> planeModelsLines = new LinkedList<>();
         int modelsAdded = 0;
         try{
@@ -127,7 +123,7 @@ public class AdminClient {
             for(String info : seatsInfo){
                 String[] tokens = info.split("#");
                 if(tokens.length > 3){
-                    System.out.println("Error in file"); //todo complete error
+                    System.out.println("Error in file format.");
                 }
                 switch (tokens[0]) {
                     case "BUSINESS":
@@ -172,7 +168,6 @@ public class AdminClient {
         int flightsAdded = 0;
         for (List<String> flightsLine : flightsLines) {
             Map<Category, Set<String>> tickets = parseTickets(flightsLine.get(3));
-            // TODO fix catch
             try {
                 flightAdminService.registerFlight(flightsLine.get(0), flightsLine.get(1), flightsLine.get(2), tickets);
                 flightsAdded++;
