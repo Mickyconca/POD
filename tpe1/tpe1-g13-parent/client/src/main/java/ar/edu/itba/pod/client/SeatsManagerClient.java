@@ -166,8 +166,8 @@ public class SeatsManagerClient {
     private static void assignSeat(SeatService seatService, String flightCode, int row, char col, String passenger) {
         try {
             seatService.assign(flightCode, row, col, passenger);
-            System.out.printf("Seat %d%c is assigned to %s", row, col, passenger);
-        } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | PassengerWithSeatAlreadyAssignedException | InvalidSeatCategoryException | SeatNotEmptyException | FlightCancelledException | FlightAlreadyConfirmedException exception){
+            System.out.printf("Seat %d%c is assigned to %s.", row, col, passenger);
+        } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | PassengerWithSeatAlreadyAssignedException | InvalidSeatCategoryException | SeatNotEmptyException | FlightAlreadyConfirmedException | FlightCancelledException | SecurityException exception){
             System.out.println(exception.getMessage());
         }
     }

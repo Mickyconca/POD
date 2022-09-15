@@ -183,3 +183,11 @@ tpe1/tpe1-g13-parent/client/target/classes/modelos.csv
 tpe1/tpe1-g13-parent/client/target/classes/vuelos.csv
 
 tpe1/tpe1-g13-parent/client/target/maven-archiver/pom.properties
+
+tpe1/tpe1-g13-parent/client/src/main/resources/commands.txt
+
+tpe1/tpe1-g13-parent/client/src/main/resources/modelos.csv
+
+tpe1/tpe1-g13-parent/client/src/main/resources/query1.csv
+
+tpe1/tpe1-g13-parent/client/target/classes/query1.csv

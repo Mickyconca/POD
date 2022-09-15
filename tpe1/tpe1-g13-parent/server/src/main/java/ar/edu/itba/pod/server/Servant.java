@@ -101,14 +101,14 @@ public class Servant implements FlightService {
         int added = 0;
         List<String> notAdded = new LinkedList<>();
         for (Passenger p : sortedPassengers) {
-            if(changeTicket(flight, p)){
+            if (changeTicket(flight, p)) {
                 added++;
-            }else{
+            } else {
                 notAdded.add("Cannot find alternative flight for " + p.getName() + " with Ticket " + flightCode);
             }
 
         }
-        notAdded.add(0,String.valueOf(added));
+        notAdded.add(0, String.valueOf(added));
         return notAdded;
     }
 
@@ -198,22 +198,27 @@ public class Servant implements FlightService {
         }
         if (flight.getStatus() == FlightStatus.PENDING) {
             Seat seat = flight.getSeat(rowNumber, colLetter);
-            if (seat != null && seat.isEmpty()) {
-                if (passengerInfo.getCategory().getCategoryId() >= seat.getCategory().getCategoryId()) {
-                    passengerInfo.setSeat(seat);
-                    seat.setEmpty(false);
-                    seatAssignedNotification(flight, passengerInfo);
-                    return;
+            if (seat != null) {
+                if (seat.isEmpty()) {
+                    if (passengerInfo.getCategory().getCategoryId() <= seat.getCategory().getCategoryId()) {
+                        passengerInfo.setSeat(seat);
+                        seat.setEmpty(false);
+                        seatAssignedNotification(flight, passengerInfo);
+                        return;
+                    }
+                    throw new InvalidSeatCategoryException();
+                }else{
+                    throw new SeatNotEmptyException();
                 }
-                throw new InvalidSeatCategoryException();
+            }else{
+                throw new SeatNotFoundException();
             }
-            throw new SeatNotEmptyException();
         }else if(flight.getStatus() == FlightStatus.CONFIRMED){
             throw new FlightAlreadyConfirmedException();
-        }else {
+        }else{
             throw new FlightCancelledException();
         }
-        
+
     }
 
     @Override
@@ -272,13 +277,13 @@ public class Servant implements FlightService {
     public List<List<String>> flightSeats(String flightCode) throws RemoteException {
         Flight flight = getFlightByCode(flightCode);
         List<List<String>> results = new LinkedList<>();
-        for(Map.Entry<Integer, Map<Character, Seat>> rows : flight.getSeats().entrySet()){
+        for (Map.Entry<Integer, Map<Character, Seat>> rows : flight.getSeats().entrySet()) {
             results.add(new LinkedList<>());
-            for(Seat seat : rows.getValue().values()){
-                results.get(rows.getKey()-1).add(seatInfoToString(flight, seat));
+            for (Seat seat : rows.getValue().values()) {
+                results.get(rows.getKey() - 1).add(seatInfoToString(flight, seat));
             }
             Category rowCategory = rows.getValue().get('A').getCategory();
-            results.get(rows.getKey()-1).add(rowCategory.getCategory());
+            results.get(rows.getKey() - 1).add(rowCategory.getCategory());
         }
         return results;
     }
@@ -288,12 +293,12 @@ public class Servant implements FlightService {
         Flight flight = getFlightByCode(flightCode);
         int[] categoryRowIndexes = flight.getPlaneModel().getCategoryRowIndexes(category);
         List<List<String>> results = new LinkedList<>();
-        for (int i = categoryRowIndexes[0] ; i <= categoryRowIndexes[1] ; i++){
+        for (int i = categoryRowIndexes[0]; i <= categoryRowIndexes[1]; i++) {
             results.add(new LinkedList<>());
-            for(Seat seat : flight.getSeats().get(i).values()){
+            for (Seat seat : flight.getSeats().get(i).values()) {
                 results.get(i).add(seatInfoToString(flight, seat));
             }
-            Category rowCategory = flight.getSeat(i,'A').getCategory();
+            Category rowCategory = flight.getSeat(i, 'A').getCategory();
             results.get(i).add(rowCategory.getCategory());
         }
         return results;
@@ -303,7 +308,7 @@ public class Servant implements FlightService {
     public List<String> flightSeatsByRow(String flightCode, int rowNumber) throws RemoteException {
         Flight flight = getFlightByCode(flightCode);
         List<String> results = new LinkedList<>();
-        for(Seat seat : flight.getSeats().get(rowNumber).values()){
+        for (Seat seat : flight.getSeats().get(rowNumber).values()) {
             results.add(seatInfoToString(flight, seat));
         }
         results.add(flight.getSeats().get(rowNumber).get('A').getCategory().getCategory());
@@ -325,20 +330,20 @@ public class Servant implements FlightService {
                     //No notification
                 }
             });
-        }else{
+        } else {
             throw new FlightAlreadyConfirmedException();
         }
     }
 
     private String seatInfoToString(Flight flight, Seat seat) {
         StringBuilder data = new StringBuilder(seat.getRowNumber() + " " + seat.getColLetter() + " ");
-        if(seat.isEmpty()){
+        if (seat.isEmpty()) {
             data.append("*").append(" ");
-        }else{
+        } else {
             Optional<Passenger> passenger = flight.getPassengers().values().stream().filter((Passenger p) -> p.getSeat() == seat).findFirst();
-            if(passenger.isPresent()){
+            if (passenger.isPresent()) {
                 data.append(passenger.get().getName().charAt(0)).append(" ");
-            }else{
+            } else {
                 throw new PassengerNotFoundException();
             }
         }
@@ -412,7 +417,7 @@ public class Servant implements FlightService {
                 }
             }
         }
-        if(alternatives.isEmpty()){
+        if (alternatives.isEmpty()) {
             throw new NoAlternativesException(flightCode, passenger.getName());
         }
         Collections.sort(alternatives);
