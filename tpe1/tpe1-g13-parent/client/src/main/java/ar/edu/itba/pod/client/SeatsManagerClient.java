@@ -65,6 +65,7 @@ public class SeatsManagerClient {
         switch (action) {
             case "status":
                 if(col == null){
+                    System.out.println("Col es null");
                     System.out.println("Invalid column arguments");
                     break;
                 }
