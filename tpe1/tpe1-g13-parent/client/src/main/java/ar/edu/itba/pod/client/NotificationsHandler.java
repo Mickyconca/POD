@@ -25,7 +25,12 @@ public class NotificationsHandler implements NotificationsServiceClient {
 
     @Override
     public void onStatusChange(String flightCode, String destination, String flightStatus, String category, Integer row, Character col) {
-        String notification = String.format("Your Flight %s with destination %s was %s and your seat is %s %d%c.", flightCode, destination, flightStatus.toLowerCase(), category, row, col);
+        String notification;
+        if(row == null || col == null){
+            notification = String.format("Your Flight %s with destination %s was %s and your seat is %s.", flightCode, destination, flightStatus.toLowerCase(), category);
+        }else {
+            notification = String.format("Your Flight %s with destination %s was %s and your seat is %s %d%c.", flightCode, destination, flightStatus.toLowerCase(), category, row, col);
+        }
         System.out.println(notification);
     }
 

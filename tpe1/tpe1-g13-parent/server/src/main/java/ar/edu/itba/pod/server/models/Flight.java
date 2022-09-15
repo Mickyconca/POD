@@ -98,8 +98,6 @@ public class Flight {
         int row=1;
         for (Category c : Category.values()) {
                 int[] seatNumbers = planeModel.categories.get(c.getCategoryId());
-                System.out.println(flightCode + " rows:" + seatNumbers[0]);
-                System.out.println(flightCode + "seatNum[1]:" + seatNumbers[1]);
                 for (int i = 1; i <= seatNumbers[0]; i++) {
                     seats.put(row,new HashMap<>());
                     for (int j = 0; j < seatNumbers[1]; j++) {
@@ -110,7 +108,6 @@ public class Flight {
             }
         }
 
-//        for(Category )
 
 
     }
@@ -123,9 +120,6 @@ public class Flight {
                     capacity++;
                 }
             }
-//            if(!columns.isEmpty() && columns.get('A').getCategory() == category){ //if it's not empty, first letter is A
-//                capacity+=columns.size(); //all columns belong to the same category
-//            }
         }
         return capacity;
     }

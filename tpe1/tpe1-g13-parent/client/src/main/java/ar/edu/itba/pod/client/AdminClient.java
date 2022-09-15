@@ -133,19 +133,14 @@ public class AdminClient {
                     case "BUSINESS":
                         businessSeats[0] = Integer.parseInt(tokens[1]);
                         businessSeats[1] = Integer.parseInt(tokens[2]);
-                        System.out.println(line.get(0) + "business " + "rows " + businessSeats[0] + "cols " + businessSeats[1]);
                         break;
                     case "PREMIUM_ECONOMY":
                         premiumSeats[0] = Integer.parseInt(tokens[1]);
                         premiumSeats[1] = Integer.parseInt(tokens[2]);
-                        System.out.println(line.get(0) + "premium " + "rows " + premiumSeats[0] + "cols " + premiumSeats[1]);
-
                         break;
                     case "ECONOMY":
                         economySeats[0] = Integer.parseInt(tokens[1]);
                         economySeats[1] = Integer.parseInt(tokens[2]);
-                        System.out.println(line.get(0) + "economy " + "rows " + economySeats[0] + "cols " + economySeats[1]);
-
                         break;
                 }
             }

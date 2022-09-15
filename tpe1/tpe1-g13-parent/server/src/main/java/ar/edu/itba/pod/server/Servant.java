@@ -153,11 +153,19 @@ public class Servant implements FlightService {
                 Passenger finalPassenger = passenger;
                 if (finalPassenger.hasSeatAssigned()) {
                     executor.execute(() -> {
-                        handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), finalPassenger.getSeat().getCategory().getCategory(), finalPassenger.getSeat().getRowNumber(), finalPassenger.getSeat().getColLetter());
+                        try {
+                            handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), finalPassenger.getSeat().getCategory().getCategory(), finalPassenger.getSeat().getRowNumber(), finalPassenger.getSeat().getColLetter());
+                        } catch (RemoteException e) {
+                            //No notification
+                        }
                     });
                 } else {
                     executor.execute(() -> {
-                        handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), finalPassenger.getCategory().getCategory(), null, null);
+                        try {
+                            handler.onStatusChange(flight.getFlightCode(), flight.getDestination(), flight.getStatus().getStatus(), finalPassenger.getCategory().getCategory(), null, null);
+                        } catch (RemoteException e) {
+                            //No notification
+                        }
                     });
                 }
                 if (flight.getStatus() == FlightStatus.CONFIRMED) {
@@ -188,9 +196,9 @@ public class Servant implements FlightService {
         if (passengerInfo.hasSeatAssigned()) {
             throw new PassengerWithSeatAlreadyAssignedException();
         }
-        Seat seat = flight.getSeat(rowNumber, colLetter);
-        if (seat != null) {
-            if (seat.isEmpty() && flight.getStatus() == FlightStatus.PENDING) {
+        if (flight.getStatus() == FlightStatus.PENDING) {
+            Seat seat = flight.getSeat(rowNumber, colLetter);
+            if (seat != null && seat.isEmpty()) {
                 if (passengerInfo.getCategory().getCategoryId() >= seat.getCategory().getCategoryId()) {
                     passengerInfo.setSeat(seat);
                     seat.setEmpty(false);
@@ -200,6 +208,10 @@ public class Servant implements FlightService {
                 throw new InvalidSeatCategoryException();
             }
             throw new SeatNotEmptyException();
+        }else if(flight.getStatus() == FlightStatus.CONFIRMED){
+            throw new FlightAlreadyConfirmedException();
+        }else {
+            throw new FlightCancelledException();
         }
         
     }
@@ -307,7 +319,11 @@ public class Servant implements FlightService {
             passengersNotifications.get(passengerName).putIfAbsent(flightCode, new LinkedList<>());
             passengersNotifications.get(passengerName).get(flightCode).add(handler);
             executor.execute(() -> {
-                handler.onPassengerRegistered(flightCode, flight.getDestination());
+                try {
+                    handler.onPassengerRegistered(flightCode, flight.getDestination());
+                } catch (RemoteException e) {
+                    //No notification
+                }
             });
         }else{
             throw new FlightAlreadyConfirmedException();
@@ -333,7 +349,11 @@ public class Servant implements FlightService {
         if (passengersNotifications.containsKey(passenger.getName()) && passengersNotifications.get(passenger.getName()).containsKey(flight.getFlightCode())) {
             for (NotificationsServiceClient handler : passengersNotifications.get(passenger.getName()).get(flight.getFlightCode())) {
                 executor.execute(() -> {
-                    handler.onSeatAssigned(passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
+                    try {
+                        handler.onSeatAssigned(passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
+                    } catch (RemoteException e) {
+                        //No notification
+                    }
                 });
             }
         }
@@ -343,7 +363,11 @@ public class Servant implements FlightService {
         if (passengersNotifications.containsKey(passenger.getName()) && passengersNotifications.get(passenger.getName()).containsKey(flight.getFlightCode())) {
             for (NotificationsServiceClient handler : passengersNotifications.get(passenger.getName()).get(flight.getFlightCode())) {
                 executor.execute(() -> {
-                    handler.onSeatChanged(oldSeat.getCategory().getCategory(), oldSeat.getRowNumber(), oldSeat.getColLetter(), passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
+                    try {
+                        handler.onSeatChanged(oldSeat.getCategory().getCategory(), oldSeat.getRowNumber(), oldSeat.getColLetter(), passenger.getSeat().getCategory().getCategory(), passenger.getSeat().getRowNumber(), passenger.getSeat().getColLetter(), flight.getFlightCode(), flight.getDestination());
+                    } catch (RemoteException e) {
+                        //No notification
+                    }
                 });
             }
         }
@@ -356,7 +380,11 @@ public class Servant implements FlightService {
                 passengersNotifications.get(passenger.getName()).putIfAbsent(newFlight.getFlightCode(), new LinkedList<>());
                 passengersNotifications.get(passenger.getName()).get(newFlight.getFlightCode()).add(handler);
                 executor.execute(() -> {
-                    handler.onTicketChange(oldFlight.getFlightCode(), oldFlight.getDestination(), newFlight.getFlightCode(), newFlight.getDestination());
+                    try {
+                        handler.onTicketChange(oldFlight.getFlightCode(), oldFlight.getDestination(), newFlight.getFlightCode(), newFlight.getDestination());
+                    } catch (RemoteException e) {
+                        //No notification
+                    }
                 });
             }
         }

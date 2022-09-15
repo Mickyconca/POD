@@ -167,7 +167,7 @@ public class SeatsManagerClient {
         try {
             seatService.assign(flightCode, row, col, passenger);
             System.out.printf("Seat %d%c is assigned to %s", row, col, passenger);
-        } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | PassengerWithSeatAlreadyAssignedException | InvalidSeatCategoryException | SeatNotEmptyException exception){
+        } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | PassengerWithSeatAlreadyAssignedException | InvalidSeatCategoryException | SeatNotEmptyException | FlightCancelledException | FlightAlreadyConfirmedException exception){
             System.out.println(exception.getMessage());
         }
     }
@@ -176,8 +176,8 @@ public class SeatsManagerClient {
         try {
             seatService.move(flightCode, passenger, row, col);
             System.out.printf("Seat %d%c is assigned to %s", row, col, passenger);
-        } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | PassengerWithSeatAlreadyAssignedException | InvalidSeatCategoryException | SeatNotEmptyException exception) {
-            System.out.print("Exception");
+        } catch (RemoteException | FlightNotFoundException | PassengerNotFoundException | PassengerWithSeatAlreadyAssignedException | InvalidSeatCategoryException | SeatNotEmptyException | FlightCancelledException | FlightAlreadyConfirmedException exception) {
+            System.out.print(exception.getMessage());
         }
     }
 

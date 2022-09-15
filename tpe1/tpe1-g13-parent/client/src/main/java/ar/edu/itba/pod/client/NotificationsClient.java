@@ -1,13 +1,20 @@
 package ar.edu.itba.pod.client;
 
+import ar.edu.itba.pod.exceptions.FlightAlreadyConfirmedException;
+import ar.edu.itba.pod.exceptions.FlightNotFoundException;
+import ar.edu.itba.pod.exceptions.PassengerNotFoundException;
 import ar.edu.itba.pod.services.NotificationsServiceClient;
 import ar.edu.itba.pod.services.NotificationsServiceServer;
+import ar.edu.itba.pod.services.SeatService;
 
 import java.io.IOException;
+import java.rmi.Naming;
 import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.GregorianCalendar;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -43,12 +50,27 @@ public class NotificationsClient{
             return;
         }
 
-        final Registry registry = LocateRegistry.getRegistry(serverAddress.getIp(), serverAddress.getPort());
-        NotificationsServiceClient notificationsHandlerClient = new NotificationsHandler();
-        UnicastRemoteObject.exportObject(notificationsHandlerClient,0);
-        NotificationsServiceServer notificationsService = (NotificationsServiceServer) registry.lookup(NotificationsServiceServer.class.getName());
-        notificationsService.registerPassengerForNotifications(passenger, flight, notificationsHandlerClient);
+        final NotificationsServiceServer notificationsServiceServer = (NotificationsServiceServer) Naming.lookup("//" + serverAddress.getServerAddress() + "/" + NotificationsServiceServer.class.getName());
+        NotificationsServiceClient notificationsServiceClient = new NotificationsHandler();
+        UnicastRemoteObject.exportObject(notificationsServiceClient, 0);
+
+        try{
+            notificationsServiceServer.registerPassengerForNotifications(passenger, flight, notificationsServiceClient);
+        }catch(RemoteException e){
+            UnicastRemoteObject.unexportObject(notificationsServiceClient, true);
+            System.out.println("Remote Exception. Error registering client's notifications.");
+        }catch(FlightNotFoundException e){
+            UnicastRemoteObject.unexportObject(notificationsServiceClient, true);
+            System.out.println("Flight not found.");
+        }catch (PassengerNotFoundException e){
+            UnicastRemoteObject.unexportObject(notificationsServiceClient, true);
+            System.out.println("Passenger not found.");
+        }catch (FlightAlreadyConfirmedException e){
+            UnicastRemoteObject.unexportObject(notificationsServiceClient, true);
+            System.out.println("Flight is already confirmed. Cannot sign up for notifications.");
+        }
 
     }
+
 
 }
