@@ -96,47 +96,54 @@ public class Servant implements FlightService {
 
     @Override
     public List<String> changeFlightTickets(String flightCode) throws RemoteException {
-        Flight flight = getFlightByCode(flightCode);
-        List<Passenger> sortedPassengers = flight.getPassengers().values().stream().sorted(Comparator.comparing(Passenger::getName)).collect(Collectors.toList());
-        int added = 0;
         List<String> notAdded = new LinkedList<>();
-        for (Passenger p : sortedPassengers) {
-            if (changeTicket(flight, p)) {
-                added++;
-            } else {
-                notAdded.add("Cannot find alternative flight for " + p.getName() + " with Ticket " + flightCode);
-            }
+        synchronized (flightsLock) {
+            Flight flight = getFlightByCode(flightCode);
+            List<Passenger> sortedPassengers = flight.getPassengers().values().stream().sorted(Comparator.comparing(Passenger::getName)).collect(Collectors.toList());
+            int added = 0;
+            for (Passenger p : sortedPassengers) {
+                if (changeTicket(flight, p)) {
+                    added++;
+                } else {
+                    notAdded.add("Cannot find alternative flight for " + p.getName() + " with Ticket " + flightCode);
+                }
 
+            }
+            notAdded.add(0, String.valueOf(added));
+            return notAdded;
         }
-        notAdded.add(0, String.valueOf(added));
-        return notAdded;
     }
 
     private boolean changeTicket(Flight originalFlight, Passenger passenger) throws RemoteException {
-        List<AlternativeFlight> alternativeFlights = getAlternatives(originalFlight.getFlightCode(), originalFlight.getDestination(), passenger);
-        if (alternativeFlights.isEmpty()) {
-            return false;
-        }
-        //find best alternative
-        AlternativeFlight alternativeFlight = alternativeFlights.get(0);
-        int altCapacity = alternativeFlight.getFlight().getCategoryCapacity(alternativeFlight.getCategory());
-        Category category = alternativeFlight.getCategory();
-        for (AlternativeFlight af : alternativeFlights.stream().filter((AlternativeFlight af) -> af.getCategory() == category).collect(Collectors.toList())) {
-            int newCapacity = af.getFlight().getCategoryCapacity(af.getCategory());
-            if (newCapacity > altCapacity) {
-                alternativeFlight = af;
-                altCapacity = newCapacity;
-            } else if (newCapacity == altCapacity) {
-                if (af.getFlight().getFlightCode().compareTo(alternativeFlight.getFlight().getFlightCode()) < 0) {
+        synchronized (flightsLock) {
+            List<AlternativeFlight> alternativeFlights = getAlternatives(originalFlight.getFlightCode(), originalFlight.getDestination(), passenger);
+            if (alternativeFlights.isEmpty()) {
+                return false;
+            }
+            //find best alternative
+            AlternativeFlight alternativeFlight = alternativeFlights.get(0);
+            int altCapacity = alternativeFlight.getFlight().getCategoryCapacity(alternativeFlight.getCategory());
+            Category category = alternativeFlight.getCategory();
+            for (AlternativeFlight af : alternativeFlights.stream().filter((AlternativeFlight af) -> af.getCategory() == category).collect(Collectors.toList())) {
+                int newCapacity = af.getFlight().getCategoryCapacity(af.getCategory());
+                if (newCapacity > altCapacity) {
                     alternativeFlight = af;
+                    altCapacity = newCapacity;
+                } else if (newCapacity == altCapacity) {
+                    if (af.getFlight().getFlightCode().compareTo(alternativeFlight.getFlight().getFlightCode()) < 0) {
+                        alternativeFlight = af;
+                    }
                 }
             }
-        }
 
 
-        if (passenger.hasSeatAssigned()) {
-            passenger.getSeat().setEmpty(true);
-            passenger.setSeat(null);
+            if (passenger.hasSeatAssigned()) {
+                passenger.getSeat().setEmpty(true);
+                passenger.setSeat(null);
+            }
+            originalFlight.removePassenger(passenger);
+            alternativeFlight.getFlight().addPassenger(passenger);
+            return true;
         }
         originalFlight.removePassenger(passenger);
         alternativeFlight.getFlight().addPassenger(passenger);
