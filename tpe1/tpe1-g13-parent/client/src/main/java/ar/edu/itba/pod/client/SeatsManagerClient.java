@@ -65,7 +65,6 @@ public class SeatsManagerClient {
         switch (action) {
             case "status":
                 if(col == null){
-                    System.out.println("Col es null");
                     System.out.println("Invalid column arguments");
                     break;
                 }
@@ -144,6 +143,7 @@ public class SeatsManagerClient {
                 }
                 if(originalFlight == null){
                     System.out.println("Missing original flight code argument.");
+                    break;
                 }
                 changeTicket(seatService, originalFlight, flight, passenger);
                 break;

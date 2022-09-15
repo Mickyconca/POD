@@ -216,7 +216,7 @@ public class AdminClient {
     private static void reticketing(FlightAdminService flightAdminService, String flight){
         try{
             List<String> ticketsChanged = flightAdminService.changeFlightTickets(flight);
-            System.out.println(ticketsChanged.get(0) + " tickets where changed.");
+            System.out.println(ticketsChanged.get(0) + " tickets were changed.");
             if(ticketsChanged.size()>1){
                 for (String s : ticketsChanged.subList(1, ticketsChanged.size())){
                     System.out.println(s);

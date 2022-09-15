@@ -140,6 +140,7 @@ public class Servant implements FlightService {
         }
         originalFlight.removePassenger(passenger);
         alternativeFlight.getFlight().addPassenger(passenger);
+        changeTicketNotification(originalFlight, alternativeFlight.getFlight(), passenger);
         return true;
     }
 
@@ -266,11 +267,15 @@ public class Servant implements FlightService {
                 }
                 oldFlight.removePassenger(p);
                 alternativeFlight.get().getFlight().addPassenger(p);
+                System.out.println("Ticket changed for " + p.getName());
                 changeTicketNotification(oldFlight, alternativeFlight.get().getFlight(), p);
             }
-            throw new FlightNotFoundException();
+            else
+                throw new FlightNotFoundException();
         }
-        throw new FlightAlreadyConfirmedException();
+        else{
+            throw new FlightAlreadyConfirmedException();
+        }
     }
 
     @Override
