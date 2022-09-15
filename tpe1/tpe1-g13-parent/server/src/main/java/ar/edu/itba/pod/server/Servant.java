@@ -143,12 +143,10 @@ public class Servant implements FlightService {
             }
             originalFlight.removePassenger(passenger);
             alternativeFlight.getFlight().addPassenger(passenger);
+            changeTicketNotification(originalFlight, alternativeFlight.getFlight(), passenger);
             return true;
         }
-        originalFlight.removePassenger(passenger);
-        alternativeFlight.getFlight().addPassenger(passenger);
-        changeTicketNotification(originalFlight, alternativeFlight.getFlight(), passenger);
-        return true;
+
     }
 
     private void handleStatusChangeNotifications(final Flight flight) {
@@ -188,61 +186,67 @@ public class Servant implements FlightService {
 
     @Override
     public boolean status(String flightCode, int rowNumber, char colLetter, String passenger) throws RemoteException {
-        Flight flight = getFlightByCode(flightCode);
-        Seat seat = flight.getSeat(rowNumber, colLetter);
-        if (seat != null) {
-            return seat.isEmpty();
+        synchronized (flightsLock) {
+            Flight flight = getFlightByCode(flightCode);
+            Seat seat = flight.getSeat(rowNumber, colLetter);
+            if (seat != null) {
+                return seat.isEmpty();
+            }
+            throw new SeatNotFoundException();
         }
-        throw new SeatNotFoundException();
     }
 
     @Override
     public void assign(String flightCode, int rowNumber, char colLetter, String passenger) throws RemoteException {
-        Flight flight = getFlightByCode(flightCode);
+        synchronized (flightsLock) {
+            Flight flight = getFlightByCode(flightCode);
 
-        Passenger passengerInfo = flight.getPassenger(passenger);
-        if (passengerInfo.hasSeatAssigned()) {
-            throw new PassengerWithSeatAlreadyAssignedException();
-        }
-        if (flight.getStatus() == FlightStatus.PENDING) {
-            Seat seat = flight.getSeat(rowNumber, colLetter);
-            if (seat != null) {
-                if (seat.isEmpty()) {
-                    if (passengerInfo.getCategory().getCategoryId() <= seat.getCategory().getCategoryId()) {
-                        passengerInfo.setSeat(seat);
-                        seat.setEmpty(false);
-                        seatAssignedNotification(flight, passengerInfo);
-                        return;
-                    }
-                    throw new InvalidSeatCategoryException();
-                }else{
-                    throw new SeatNotEmptyException();
-                }
-            }else{
-                throw new SeatNotFoundException();
+            Passenger passengerInfo = flight.getPassenger(passenger);
+            if (passengerInfo.hasSeatAssigned()) {
+                throw new PassengerWithSeatAlreadyAssignedException();
             }
-        }else if(flight.getStatus() == FlightStatus.CONFIRMED){
-            throw new FlightAlreadyConfirmedException();
-        }else{
-            throw new FlightCancelledException();
+            if (flight.getStatus() == FlightStatus.PENDING) {
+                Seat seat = flight.getSeat(rowNumber, colLetter);
+                if (seat != null) {
+                    if (seat.isEmpty()) {
+                        if (passengerInfo.getCategory().getCategoryId() <= seat.getCategory().getCategoryId()) {
+                            passengerInfo.setSeat(seat);
+                            seat.setEmpty(false);
+                            seatAssignedNotification(flight, passengerInfo);
+                            return;
+                        }
+                        throw new InvalidSeatCategoryException();
+                    } else {
+                        throw new SeatNotEmptyException();
+                    }
+                } else {
+                    throw new SeatNotFoundException();
+                }
+            } else if (flight.getStatus() == FlightStatus.CONFIRMED) {
+                throw new FlightAlreadyConfirmedException();
+            } else {
+                throw new FlightCancelledException();
+            }
         }
 
     }
 
     @Override
     public void move(String flightCode, String passenger, int rowNumber, char colLetter) throws RemoteException {
-        Flight flight = getFlightByCode(flightCode);
-        Passenger passengerInfo = flight.getPassenger(passenger);
-        if (flight.getFlightCode().equals(flightCode)) {
-            if (passengerInfo.hasSeatAssigned()) {
-                Seat oldSeat = passengerInfo.getSeat();
-                try {
-                    passengerInfo.setSeat(null);
-                    assign(flightCode, rowNumber, colLetter, passenger);
-                    seatMovedNotification(flight, passengerInfo, oldSeat);
-                } catch (Exception e) {
-                    passengerInfo.setSeat(oldSeat);
-                    e.printStackTrace();
+        synchronized (flightsLock) {
+            Flight flight = getFlightByCode(flightCode);
+            Passenger passengerInfo = flight.getPassenger(passenger);
+            if (flight.getFlightCode().equals(flightCode)) {
+                if (passengerInfo.hasSeatAssigned()) {
+                    Seat oldSeat = passengerInfo.getSeat();
+                    try {
+                        passengerInfo.setSeat(null);
+                        assign(flightCode, rowNumber, colLetter, passenger);
+                        seatMovedNotification(flight, passengerInfo, oldSeat);
+                    } catch (Exception e) {
+                        passengerInfo.setSeat(oldSeat);
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -252,98 +256,108 @@ public class Servant implements FlightService {
 //    JFK | AA103 | 18 PREMIUM_ECONOMY
     @Override
     public List<String> alternatives(String flightCode, String passenger) throws RemoteException {
-        Flight f = getFlightByCode(flightCode);
-        Passenger p = f.getPassenger(passenger);
-        List<AlternativeFlight> alternativeFlights = getAlternatives(flightCode, f.getDestination(), p);
-        return alternativeFlights.stream().map(AlternativeFlight::toString).collect(Collectors.toList());
+        synchronized (flightsLock) {
+            Flight f = getFlightByCode(flightCode);
+            Passenger p = f.getPassenger(passenger);
+            List<AlternativeFlight> alternativeFlights = getAlternatives(flightCode, f.getDestination(), p);
+            return alternativeFlights.stream().map(AlternativeFlight::toString).collect(Collectors.toList());
+        }
     }
 
     @Override
     public void changeTicket(String originalFlightCode, String alternativeFlightCode, String passenger) throws RemoteException {
-        Flight oldFlight = getFlightByCode(originalFlightCode);
-        Passenger p = oldFlight.getPassenger(passenger);
+        synchronized (flightsLock) {
+            Flight oldFlight = getFlightByCode(originalFlightCode);
+            Passenger p = oldFlight.getPassenger(passenger);
 
-        if (oldFlight.getStatus() != FlightStatus.CONFIRMED) {
+            if (oldFlight.getStatus() != FlightStatus.CONFIRMED) {
 
-            List<AlternativeFlight> alternativeFlights = getAlternatives(originalFlightCode, oldFlight.getDestination(), p);
-            Optional<AlternativeFlight> alternativeFlight = alternativeFlights.stream().filter((AlternativeFlight af) -> af.getFlight().getFlightCode().equals(alternativeFlightCode)).findFirst();
-            if (alternativeFlight.isPresent()) {
-                if (p.hasSeatAssigned()) {
-                    p.getSeat().setEmpty(true);
-                    p.setSeat(null);
-                }
-                oldFlight.removePassenger(p);
-                alternativeFlight.get().getFlight().addPassenger(p);
-                System.out.println("Ticket changed for " + p.getName());
-                changeTicketNotification(oldFlight, alternativeFlight.get().getFlight(), p);
+                List<AlternativeFlight> alternativeFlights = getAlternatives(originalFlightCode, oldFlight.getDestination(), p);
+                Optional<AlternativeFlight> alternativeFlight = alternativeFlights.stream().filter((AlternativeFlight af) -> af.getFlight().getFlightCode().equals(alternativeFlightCode)).findFirst();
+                if (alternativeFlight.isPresent()) {
+                    if (p.hasSeatAssigned()) {
+                        p.getSeat().setEmpty(true);
+                        p.setSeat(null);
+                    }
+                    oldFlight.removePassenger(p);
+                    alternativeFlight.get().getFlight().addPassenger(p);
+                    System.out.println("Ticket changed for " + p.getName());
+                    changeTicketNotification(oldFlight, alternativeFlight.get().getFlight(), p);
+                } else
+                    throw new FlightNotFoundException();
+            } else {
+                throw new FlightAlreadyConfirmedException();
             }
-            else
-                throw new FlightNotFoundException();
-        }
-        else{
-            throw new FlightAlreadyConfirmedException();
         }
     }
 
     @Override
     public List<List<String>> flightSeats(String flightCode) throws RemoteException {
-        Flight flight = getFlightByCode(flightCode);
         List<List<String>> results = new LinkedList<>();
-        for (Map.Entry<Integer, Map<Character, Seat>> rows : flight.getSeats().entrySet()) {
-            results.add(new LinkedList<>());
-            for (Seat seat : rows.getValue().values()) {
-                results.get(rows.getKey() - 1).add(seatInfoToString(flight, seat));
+        synchronized (flightsLock) {
+            Flight flight = getFlightByCode(flightCode);
+            for (Map.Entry<Integer, Map<Character, Seat>> rows : flight.getSeats().entrySet()) {
+                results.add(new LinkedList<>());
+                for (Seat seat : rows.getValue().values()) {
+                    results.get(rows.getKey() - 1).add(seatInfoToString(flight, seat));
+                }
+                Category rowCategory = rows.getValue().get('A').getCategory();
+                results.get(rows.getKey() - 1).add(rowCategory.getCategory());
             }
-            Category rowCategory = rows.getValue().get('A').getCategory();
-            results.get(rows.getKey() - 1).add(rowCategory.getCategory());
+            return results;
         }
-        return results;
     }
 
     @Override
     public List<List<String>> flightSeatsByCategory(String flightCode, Category category) throws RemoteException {
-        Flight flight = getFlightByCode(flightCode);
-        int[] categoryRowIndexes = flight.getPlaneModel().getCategoryRowIndexes(category);
-        List<List<String>> results = new LinkedList<>();
-        for (int i = categoryRowIndexes[0]; i <= categoryRowIndexes[1]; i++) {
-            results.add(new LinkedList<>());
-            for (Seat seat : flight.getSeats().get(i).values()) {
-                results.get(i).add(seatInfoToString(flight, seat));
+        synchronized (flightsLock) {
+            Flight flight = getFlightByCode(flightCode);
+            int[] categoryRowIndexes = flight.getPlaneModel().getCategoryRowIndexes(category);
+            List<List<String>> results = new LinkedList<>();
+            for (int i = categoryRowIndexes[0]; i <= categoryRowIndexes[1]; i++) {
+                results.add(new LinkedList<>());
+                for (Seat seat : flight.getSeats().get(i).values()) {
+                    results.get(i).add(seatInfoToString(flight, seat));
+                }
+                Category rowCategory = flight.getSeat(i, 'A').getCategory();
+                results.get(i).add(rowCategory.getCategory());
             }
-            Category rowCategory = flight.getSeat(i, 'A').getCategory();
-            results.get(i).add(rowCategory.getCategory());
+            return results;
         }
-        return results;
     }
 
     @Override
     public List<String> flightSeatsByRow(String flightCode, int rowNumber) throws RemoteException {
-        Flight flight = getFlightByCode(flightCode);
         List<String> results = new LinkedList<>();
-        for (Seat seat : flight.getSeats().get(rowNumber).values()) {
-            results.add(seatInfoToString(flight, seat));
+        synchronized (flightsLock) {
+            Flight flight = getFlightByCode(flightCode);
+            for (Seat seat : flight.getSeats().get(rowNumber).values()) {
+                results.add(seatInfoToString(flight, seat));
+            }
+            results.add(flight.getSeats().get(rowNumber).get('A').getCategory().getCategory());
+            return results;
         }
-        results.add(flight.getSeats().get(rowNumber).get('A').getCategory().getCategory());
-        return results;
     }
 
     @Override
     public void registerPassengerForNotifications(String passengerName, String flightCode, NotificationsServiceClient handler) {
-        Flight flight = getFlightByCode(flightCode); //throws exception if doesnt exist
-        if (flight.getStatus() != FlightStatus.CONFIRMED) {
-            flight.getPassenger(passengerName); //throws exc if passenger not in flight
-            passengersNotifications.putIfAbsent(passengerName, new HashMap<>());
-            passengersNotifications.get(passengerName).putIfAbsent(flightCode, new LinkedList<>());
-            passengersNotifications.get(passengerName).get(flightCode).add(handler);
-            executor.execute(() -> {
-                try {
-                    handler.onPassengerRegistered(flightCode, flight.getDestination());
-                } catch (RemoteException e) {
-                    //No notification
-                }
-            });
-        } else {
-            throw new FlightAlreadyConfirmedException();
+        synchronized (flightsLock) {
+            Flight flight = getFlightByCode(flightCode); //throws exception if doesnt exist
+            if (flight.getStatus() != FlightStatus.CONFIRMED) {
+                flight.getPassenger(passengerName); //throws exc if passenger not in flight
+                passengersNotifications.putIfAbsent(passengerName, new HashMap<>());
+                passengersNotifications.get(passengerName).putIfAbsent(flightCode, new LinkedList<>());
+                passengersNotifications.get(passengerName).get(flightCode).add(handler);
+                executor.execute(() -> {
+                    try {
+                        handler.onPassengerRegistered(flightCode, flight.getDestination());
+                    } catch (RemoteException e) {
+                        //No notification
+                    }
+                });
+            } else {
+                throw new FlightAlreadyConfirmedException();
+            }
         }
     }
 
